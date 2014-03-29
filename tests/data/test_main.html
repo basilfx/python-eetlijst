@@ -1,0 +1,380 @@
+
+<html>
+<head>
+<title>Eetlijst.nl - Python-eetlijst</title>
+<meta http-equiv="Refresh" content="300;url=logout.php?session_id=7d2572da1c9c02285a3a1f972c052296">
+<meta name="description" content="De online eetlijst voor studentenhuizen">
+<meta name="keywords" content="student, eten, koken, studentenhuis, studentenleven, uitwonend, universiteit, hogeschool, studentenkamer, kamer, eindhoven, delft, enschede, amsterdam, rotterdam, utrecht, den haag, tilburg, wageningen, maastricht, kosten verdelen, samen, gezellig, handig, supermarkt, boodschappen, prikbord">
+<link rel="alternate" type="application/rss+xml" title="Eetlijst.nl" href="rss.php?basilfx-d48269c6b643f08f6f4c2d4123a99e3c">
+<link rel="stylesheet" type="text/css" href="style.css">
+</head>
+<body>
+<SCRIPT TYPE="text/javascript" LANGUAGE="JavaScript">
+<!--//
+main=new Image();
+main.src='balmain.gif';
+kost=new Image();
+kost.src='balkost.gif';
+taak=new Image();
+taak.src='baltaak.gif';
+shop=new Image();
+shop.src='balshop.gif';
+conf=new Image();
+conf.src='balconf.gif';
+faq=new Image();
+faq.src='faq.gif';
+link=new Image();
+link.src='ballink.gif';
+exit=new Image();
+exit.src='balexit.gif';
+mail=new Image();
+mail.src='balmail.gif';
+
+z=new Image();
+z.src='z.gif';
+
+textmain=new Image();
+textmain.src='textmain.gif';
+textkost=new Image();
+textkost.src='textkost.gif';
+texttaak=new Image();
+texttaak.src='texttaak.gif';
+textshop=new Image();
+textshop.src='textshop.gif';
+textconf=new Image();
+textconf.src='textconf.gif';
+textfaq=new Image();
+textfaq.src='textfaq.gif';
+textlink=new Image();
+textlink.src='textlink.gif';
+textexit=new Image();
+textexit.src='textexit.gif';
+textmail=new Image();
+textmail.src='textmail.gif';
+
+function Aan(Naam) {
+document[Naam].src='bal'+Naam+'.gif';
+document['descr'].src='text'+Naam+'.gif';
+}
+function Uit(Naam) {
+document[Naam].src='bol'+Naam+'.gif';
+document['descr'].src='/leeg.gif';
+}
+function TextAan(Naam) {
+document['descr'].src='text'+Naam+'.gif';
+}
+
+var zmsg='Bezig met aanpassen...';
+function TextUit(Naam) {
+document['descr'].src='/leeg.gif';
+}
+function Aan2(Naam) {
+document[Naam].src='bal'+Naam+'.gif';
+document['descr2'].src='text'+Naam+'.gif';
+}
+function Uit2(Naam) {
+document[Naam].src='bol'+Naam+'.gif';
+document['descr2'].src='/leeg.gif';
+}
+function k(arg1,arg2,arg3) {
+var i=document.getElementById(arg1+'p'+arg2).getElementsByTagName('img')[0];
+i.width=20;
+i.src='z.gif';
+i.title=zmsg;
+ua('sess=7d2572da1c9c02285a3a1f972c052296&day='+arg1+'&who='+arg2+'&what='+arg3);
+}
+function popup(persoon) {
+var popup = window.showModalDialog('persoon.php?persoon='+persoon+'&session_id=7d2572da1c9c02285a3a1f972c052296', 'toolbar=0,scrollbars=1,location=0,statusbar=1,menubar=0,resizable=0,width=500,height=500');
+//No return values to handle
+}
+function vs(dag) {
+var popup = window.showModalDialog('vs.php?dag='+dag+'&tz=', 'toolbar=0,scrollbars=1,location=0,statusbar=1,menubar=0,resizable=0,width=500,height=400');
+if (typeof(popup) != 'undefined' && popup != null) {
+  document.eetlijst.veranderdag.value = popup.veranderdag;
+  document.eetlijst.nieuwetijd.value = popup.nieuwetijd;
+  document.eetlijst.submit();
+}
+}
+var noLinkClicked=true;
+function pb() {
+var popup = window.showModalDialog('pb.php?e&session_id=7d2572da1c9c02285a3a1f972c052296', 'toolbar=0,scrollbars=1,location=0,statusbar=1,menubar=0,resizable=0,width=500,height=500');
+if (typeof(popup) != 'undefined' && popup != null) {
+  document.eetlijst.messageboard.value = popup.messageboard;
+  document.eetlijst.submittype.value = 2; //submittype is 1 (or submitwithform_x/submitwithform_y) for eetlijst itself and 2 for messageboard
+  document.eetlijst.submit();
+}
+}
+function ua(p) {
+var x;
+try {
+x=new XMLHttpRequest();// Firefox, Opera 8.0+, Safari
+}
+catch (e) {
+try {
+x=new ActiveXObject("Msxml2.XMLHTTP"); // Internet Explorer
+}
+catch (e) {
+try {
+x=new ActiveXObject("Microsoft.XMLHTTP");
+}
+catch (e) {
+alert("Met jouw browser heeft Eelijst.nl helaas geen rekening gehouden. Neem contact op met info@eetlijst.nl. Excuses voor het ongemak.");
+return false;
+}
+}
+}
+x.onreadystatechange=function() {
+if(x.readyState==4) {
+var res=x.responseText.split("&");
+var day;
+var who;
+var val;
+for(var i=0;i<res.length;i++) {
+var field=res[i].split("=");
+if(field[0]=="day") day=field[1];
+if(field[0]=="who") who=field[1];
+if(field[0]=="val") val=field[1];
+}
+var ih;
+var what;
+if (val=="null") {
+ih="<img src=\"leeg.gif\" width=\"50\" height=\"20\" title=\"Klik hier als je wilt mee eten\">";
+what="-1";
+} else if(val=="-1") {
+ih="<img src=\"eet.gif\" title=\"Je eet mee - Klik hier als je wilt koken\">";
+what="1";
+} else if(val=="0") {
+ih="<img src=\"nop.gif\" title=\"Je eet NIET mee - Klik hier om je keuze te verwijderen\">";
+what="-5";
+} else if(val=="1") {
+ih="<img src=\"kook.gif\" title=\"Je kookt - Klik hier als je NIET mee wilt eten / koken\">";
+what="0";
+}
+else {
+ih="?";
+alert('Wijziging is NIET doorgevoerd!\n\nVernieuw/Refresh de pagina en probeer het opnieuw of gebruik het menu onder de Eetlijst.\n\n('+res+')');
+what="";
+}
+var n=document.getElementById(day+"p"+who);
+n.href="javascript:k("+day+","+who+","+what+");";
+n.innerHTML=ih;
+}
+}
+x.open("GET","k.php?"+p,true);
+x.send(null);
+}
+//-->
+</SCRIPT>
+<div align="center"><center>
+<table cellspacing="0" width="80%" height="100%"><tr><td bgcolor="#ffffff">
+<table bgcolor="#dddddd" width="100%" height="100%" cellspacing="0">
+<tr><td width="15"><img src="borderlb.gif"></td><td class="bt" colspan="5"></td><td width="13"><img src="borderrb.gif"></td></tr>
+<tr>
+<td class="bl"></td>
+<td colspan="5">
+  <table width="100%" cellspacing="0">
+    <tr>
+      <td class="l" width="140"><a href="/"><img src="/logomwoa.gif" alt="Home"></a></td>
+      <td class="l" valign="middle"><font size="4">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b><nobr>Python-eetlijst</nobr></b></font></td>
+      <td class="r" valign="middle">
+        <img src="/leeg.gif" name="descr">
+        a href="main.php?session_id=7d2572da1c9c02285a3a1f972c052296" OnMouseOver="TextAan('refr');return true;" OnMouseOut="TextUit('refr');return true;"><img src="balrefr.gif" alt="Ververs deze pagina" title="Ververs deze pagina" name="refr"></a>
+        <a href="kosten.php?session_id=7d2572da1c9c02285a3a1f972c052296" OnMouseOver="Aan('kost');return true;" OnMouseOut="Uit('kost');return true;"><img src="bolkost.gif" alt="Kostenbeheer" title="Kostenbeheer" name="kost"></a>
+        <a href="taken.php?session_id=7d2572da1c9c02285a3a1f972c052296" OnMouseOver="Aan('taak');return true;" OnMouseOut="Uit('taak');return true;"><img src="boltaak.gif" alt="Takenbeheer" title="Takenbeheer" name="taak"></a>
+        <a href="shop.php?session_id=7d2572da1c9c02285a3a1f972c052296" OnMouseOver="Aan('shop');return true;" OnMouseOut="Uit('shop');return true;"><img src="bolshop.gif" alt="Shop" title="Shop" name="shop"></a>
+        <a href="config.php?session_id=7d2572da1c9c02285a3a1f972c052296" OnMouseOver="Aan('conf');return true;" OnMouseOut="Uit('conf');return true;"><img src="bolconf.gif" alt="Instellingen" title="Instellingen" name="conf"></a>
+        <a href="logout.php?session_id=7d2572da1c9c02285a3a1f972c052296" OnMouseOver="Aan('exit');return true;" OnMouseOut="Uit('exit');return true;"><img src="bolexit.gif" alt="Uitloggen" title="Uitloggen" name="exit"></a>
+      </td>
+    </tr>
+  </table>
+  <br><br>
+</td>
+<td class="br"></td>
+</tr>
+<tr>
+  <td class="bl"></td>
+  <td valign="top" colspan="5"><!--/* STUDENTENLINK Javascript Tag v2.4.7 */-->
+
+<!--/*
+  * The backup image section of this tag has been generated for use on a
+  * non-SSL page. If this tag is to be placed on an SSL page, change the
+  *   'http://banner.studenten.net/ads/...'
+  * to
+  *   'https://banner.studenten.net/ads/...'
+  *
+  * This noscript section of this tag only shows image banners. There
+  * is no width or height in these banners, so if you want these tags to
+  * allocate space for the ad before it shows, you will need to add this
+  * information to the <img> tag.
+  *
+  * If you do not want to deal with the intricities of the noscript
+  * section, delete the tag (from <noscript>... to </noscript>). On
+  * average, the noscript tag is called from less than 1% of internet
+  * users.
+  */-->
+
+<script type='text/javascript'><!--//<![CDATA[
+   var m3_u = (location.protocol=='https:'?'https://banner.studenten.net/ads/ajs.php':'http://banner.studenten.net/ads/ajs.php');
+   var m3_r = Math.floor(Math.random()*99999999999);
+   if (!document.MAX_used) document.MAX_used = ',';
+   document.write ("<scr"+"ipt type='text/javascript' src='"+m3_u);
+   document.write ("?zoneid=516");
+   document.write ('&amp;cb=' + m3_r);
+   if (document.MAX_used != ',') document.write ("&amp;exclude=" + document.MAX_used);
+   document.write ("&amp;loc=" + escape(window.location));
+   if (document.referrer) document.write ("&amp;referer=" + escape(document.referrer));
+   if (document.context) document.write ("&context=" + escape(document.context));
+   if (document.mmm_fo) document.write ("&amp;mmm_fo=1");
+   document.write ("'><\/scr"+"ipt>");
+//]]>--></script><noscript><a href='http://banner.studenten.net/ads/ck.php?n=a5d3888d&amp;cb=INSERT_RANDOM_NUMBER_HERE' target='_blank'><img src='http://banner.studenten.net/ads/avw.php?zoneid=516&amp;cb=INSERT_RANDOM_NUMBER_HERE&amp;n=a5d3888d' border='0' alt='' /></a></noscript>  <br><br>
+  </td>
+  <td class="br"></td></tr>
+<tr height="100%">
+  <td class="bl"></td>
+  <td valign="top">
+<table>
+<tr>
+    <th width="80" height="20">&nbsp;</th>
+    <th width="80"><a class="th" href="javascript:popup(0);" title="Meer informatie over Unknown1"><nobr><b>Unknown1</b></nobr></a></th>
+    <th width="80"><a class="th" href="javascript:popup(1);" title="Meer informatie over Unknown2"><nobr><b>Unknown2</b></nobr></a></th>
+    <th width="80"><a class="th" href="javascript:popup(2);" title="Meer informatie over Unknown3"><nobr><b>Unknown3</b></nobr></a></th>
+    <th width="80"><a class="th" href="javascript:popup(3);" title="Meer informatie over Unknown4"><nobr><b>Unknown4</b></nobr></a></th>
+    <th width="80"><a class="th" href="javascript:popup(4);" title="Meer informatie over Unknown5"><nobr><b>Unknown5</b></nobr></a></th>
+</tr>
+<tr><th colspan="6"><img src="leeg.gif" height="1"></th></tr>
+<tr>
+      <td class="r"><nobr>&nbsp;za&nbsp;</nobr></td>
+      <td><a id="1396047600p0" href="javascript:k(1396047600,0,1);"><img src="eet.gif" title="Unknown1 eet mee (vandaag onveranderd) - Klik hier als je wilt koken"></a></td>
+      <td><a id="1396047600p1" href="javascript:k(1396047600,1,1);"><img src="eet.gif" title="Unknown2 eet mee (vandaag onveranderd) - Klik hier als je wilt koken"></a></td>
+      <td><a id="1396047600p2" href="javascript:k(1396047600,2,1);"><img src="eet.gif" title="Unknown3 eet mee (vandaag onveranderd) - Klik hier als je wilt koken"></a></td>
+      <td><a id="1396047600p3" href="javascript:k(1396047600,3,1);"><img src="eet.gif" title="Unknown4 eet mee (vandaag onveranderd) - Klik hier als je wilt koken"></a></td>
+      <td><a id="1396047600p4" href="javascript:k(1396047600,4,1);"><img src="eet.gif" title="Unknown5 eet mee (vandaag onveranderd) - Klik hier als je wilt koken"></a></td>
+</tr>
+<tr class="s">
+      <td class="r"><nobr>&nbsp;zo&nbsp;</nobr></td>
+      <td><a id="1396134000p0" href="javascript:k(1396134000,0,0);"><img src="kook.gif" title="Unknown1 kookt - Klik hier als je NIET mee wilt eten / koken"></a></td>
+      <td><img src="eet.gif" title="Unknown2 en nog 2 personen eten mee"><img src="eet.gif" title="Unknown2 en nog 2 personen eten mee"><img src="eet.gif" title="Unknown2 en nog 2 personen eten mee"></td>
+      <td><a id="1396134000p2" href="javascript:k(1396134000,2,-5);"><img src="nop.gif" title="Unknown3 eet NIET mee - Klik hier om je keuze te verwijderen"></a></td>
+      <td><a id="1396134000p3" href="javascript:k(1396134000,3,-5);"><img src="nop.gif" title="Unknown4 eet NIET mee - Klik hier om je keuze te verwijderen"></a></td>
+      <td><a id="1396134000p4" href="javascript:k(1396134000,4,-5);"><img src="nop.gif" title="Unknown5 eet NIET mee - Klik hier om je keuze te verwijderen"></a></td>
+</tr>
+<tr><th colspan="6"><img src="leeg.gif" height="3"></th></tr>
+<tr>
+      <td class="r"><nobr>&nbsp;ma&nbsp;</nobr></td>
+      <td><a id="1396216800p0" href="javascript:k(1396216800,0,-1);"><img src="leeg.gif" width="50" height="20" title="Klik hier als je wilt mee eten"></a></td>
+      <td><a id="1396216800p1" href="javascript:k(1396216800,1,-1);"><img src="leeg.gif" width="50" height="20" title="Klik hier als je wilt mee eten"></a></td>
+      <td><a id="1396216800p2" href="javascript:k(1396216800,2,-1);"><img src="leeg.gif" width="50" height="20" title="Klik hier als je wilt mee eten"></a></td>
+      <td><a id="1396216800p3" href="javascript:k(1396216800,3,-1);"><img src="leeg.gif" width="50" height="20" title="Klik hier als je wilt mee eten"></a></td>
+      <td><a id="1396216800p4" href="javascript:k(1396216800,4,-1);"><img src="leeg.gif" width="50" height="20" title="Klik hier als je wilt mee eten"></a></td>
+</tr>
+<tr class="s">
+      <td class="r"><nobr>&nbsp;di&nbsp;</nobr></td>
+      <td><a id="1396303200p0" href="javascript:k(1396303200,0,-1);"><img src="leeg.gif" width="50" height="20" title="Klik hier als je wilt mee eten"></a></td>
+      <td><a id="1396303200p1" href="javascript:k(1396303200,1,-1);"><img src="leeg.gif" width="50" height="20" title="Klik hier als je wilt mee eten"></a></td>
+      <td><a id="1396303200p2" href="javascript:k(1396303200,2,-1);"><img src="leeg.gif" width="50" height="20" title="Klik hier als je wilt mee eten"></a></td>
+      <td><a id="1396303200p3" href="javascript:k(1396303200,3,-1);"><img src="leeg.gif" width="50" height="20" title="Klik hier als je wilt mee eten"></a></td>
+      <td><a id="1396303200p4" href="javascript:k(1396303200,4,-1);"><img src="leeg.gif" width="50" height="20" title="Klik hier als je wilt mee eten"></a></td>
+</tr>
+<tr>
+      <td class="r"><nobr>&nbsp;wo&nbsp;</nobr></td>
+      <td><a id="1396389600p0" href="javascript:k(1396389600,0,-1);"><img src="leeg.gif" width="50" height="20" title="Klik hier als je wilt mee eten"></a></td>
+      <td><a id="1396389600p1" href="javascript:k(1396389600,1,-1);"><img src="leeg.gif" width="50" height="20" title="Klik hier als je wilt mee eten"></a></td>
+      <td><a id="1396389600p2" href="javascript:k(1396389600,2,-1);"><img src="leeg.gif" width="50" height="20" title="Klik hier als je wilt mee eten"></a></td>
+      <td><a id="1396389600p3" href="javascript:k(1396389600,3,-1);"><img src="leeg.gif" width="50" height="20" title="Klik hier als je wilt mee eten"></a></td>
+      <td><a id="1396389600p4" href="javascript:k(1396389600,4,-1);"><img src="leeg.gif" width="50" height="20" title="Klik hier als je wilt mee eten"></a></td>
+</tr>
+<tr class="s">
+      <td class="r"><nobr>&nbsp;do&nbsp;</nobr></td>
+      <td><a id="1396476000p0" href="javascript:k(1396476000,0,-1);"><img src="leeg.gif" width="50" height="20" title="Klik hier als je wilt mee eten"></a></td>
+      <td><a id="1396476000p1" href="javascript:k(1396476000,1,-1);"><img src="leeg.gif" width="50" height="20" title="Klik hier als je wilt mee eten"></a></td>
+      <td><a id="1396476000p2" href="javascript:k(1396476000,2,-1);"><img src="leeg.gif" width="50" height="20" title="Klik hier als je wilt mee eten"></a></td>
+      <td><a id="1396476000p3" href="javascript:k(1396476000,3,-1);"><img src="leeg.gif" width="50" height="20" title="Klik hier als je wilt mee eten"></a></td>
+      <td><a id="1396476000p4" href="javascript:k(1396476000,4,-1);"><img src="leeg.gif" width="50" height="20" title="Klik hier als je wilt mee eten"></a></td>
+</tr>
+<tr>
+      <td class="r"><nobr>&nbsp;vr&nbsp;</nobr></td>
+      <td><a id="1396562400p0" href="javascript:k(1396562400,0,-1);"><img src="leeg.gif" width="50" height="20" title="Klik hier als je wilt mee eten"></a></td>
+      <td><a id="1396562400p1" href="javascript:k(1396562400,1,-1);"><img src="leeg.gif" width="50" height="20" title="Klik hier als je wilt mee eten"></a></td>
+      <td><a id="1396562400p2" href="javascript:k(1396562400,2,-1);"><img src="leeg.gif" width="50" height="20" title="Klik hier als je wilt mee eten"></a></td>
+      <td><a id="1396562400p3" href="javascript:k(1396562400,3,-1);"><img src="leeg.gif" width="50" height="20" title="Klik hier als je wilt mee eten"></a></td>
+      <td><a id="1396562400p4" href="javascript:k(1396562400,4,-1);"><img src="leeg.gif" width="50" height="20" title="Klik hier als je wilt mee eten"></a></td>
+</tr>
+</table><font size="1"><br><img src="leeg.gif" height="1"><br></font>
+<table>
+<tr><th colspan="4">Eetlijst aanpassen</th></tr>
+<tr>
+<td class="l" bgcolor="#DDDDDD" valign="top">
+<form name="eetlijst" action="/main.php" method="post" OnSubmit="return(checkkoks());">
+<input type="hidden" name="session_id" value="7d2572da1c9c02285a3a1f972c052296">
+<input type="hidden" name="messageboard" value="">
+<input type="hidden" name="veranderdag" value="">
+<input type="hidden" name="nieuwetijd" value="">
+<input type="hidden" name="submittype" value="0">
+&nbsp;Naam<br><select name="who">
+<option value="-1">- Kies een naam -
+<option value="0">Unknown1
+<option value="1">Unknown2
+<option value="2">Unknown3
+<option value="3">Unknown4
+<option value="4">Unknown5
+</select></td>
+<td class="l" bgcolor="#DDDDDD" valign="top">&nbsp;wil graag<br><select name="what"><option value="-1" selected>mee eten (alleen)
+<option value="-2"> - met nog 1 persoon
+<option value="-3"> - met nog 2 personen
+<option value="-4"> - met meer personen
+<option value="1">koken (alleen)
+<option value="2"> - met nog 1 persoon
+<option value="3"> - met nog 2 personen
+<option value="4"> - met meer personen
+<option value="0">niet mee eten
+<option value="-5">misschien mee eten
+</select></td>
+<td class="l" bgcolor="#DDDDDD" valign="top"><select multiple size="2" name="day[]"><option value="1396047600" selected>op zaterdag 29-3<option value="1396134000">op zondag 30-3<option value="1396216800">op maandag 31-3<option value="1396303200">op dinsdag 1-4<option value="1396389600">op woensdag 2-4<option value="1396476000">op donderdag 3-4<option value="1396562400">op vrijdag 4-4</select></td>
+<td bgcolor="#DDDDDD"><input type="image" src="balok.gif" name="submitwithform" alt="Verwerk deze wijzigingen" title="Verwerk deze wijzigingen"></td>
+</tr></table>
+</form></td>
+<td><img src="leeg.gif" width="20"></td>
+<td bgcolor="#ffffff"><img src="leeg.gif" width="2"></td>
+<td><img src="leeg.gif" width="20"></td>
+<td valign="top"><SCRIPT TYPE="text/javascript" LANGUAGE="JavaScript">
+<!--//
+function checkkoks() {
+  if (document.eetlijst.who.selectedIndex == 0) {
+      alert('Selecteer de naam van de persoon wiens status je wilt veranderen');
+      return false;
+  }
+  if (document.eetlijst.what.value > 0) {
+    if(document.eetlijst['day[]'][document.eetlijst['day[]'].selectedIndex].value == 1396134000 && document.eetlijst.who.selectedIndex != 2 - 2 + 1) {
+      answer = confirm('Er is al iemand die op deze dag kookt. Weet je zeker dat je wilt aangeven dat je kookt?');
+      if (!answer) {
+        document.eetlijst['day[]'].selectedIndex = -1;
+      }
+      return answer;
+    }
+  }
+  return true;
+}
+//-->
+</SCRIPT><table><tr><th height="20"><b><a class="th" href="javascript:pb();" title="Prikbord aanpassen">Prikbord</a></b> <font size="1">[<a class="th" href="javascript:alert('Het prikbord kun je aanpassen door te klikken in het prikbord zelf of op de titel (\'Prikbord\') erboven.');">info</a>]</th></tr><tr><td bgcolor="#DDDDDD"><style type="text/css"><!--div.scroll {text-align: left;height: 552px;width: 210px;overflow: auto;border: 0px;background-color: #DDDDDD;padding: 0px;}--></style><div class="scroll" align="top" onClick="if (noLinkClicked) pb(); else noLinkClicked=true;"><a title="Klik hier als je het prikbord wilt aanpassen">This is a test message!</a></div></td></tr></table><font size="1"><br><img src="leeg.gif" height="1"><br></font>
+</td>
+<td class="br"></td></tr><tr>
+  <td class="bl"></td>
+  <td colspan="5">
+    <br><br>
+    <table width="100%" cellspacing="0"><tr><td class="l" width="30%"><font size="1" color="#888888">&copy; 2014 - Eetlijst.nl - V3.12</td><td width="40%"><font size="1" color="#888888">29-3 11:31:10</font></td></td><td class="r" width="30%" valign="middle">
+<img src="/leeg.gif" name="descr2">
+<a href="/faq.htm" OnMouseOver="Aan2('faq');return true;" OnMouseOut="Uit2('faq');return true;"><img src="bolfaq.gif" alt="Help - FAQ" title="Help - FAQ" name="faq"></a>
+<a href="/links.htm" OnMouseOver="Aan2('link');return true;" OnMouseOut="Uit2('link');return true;"><img src="bollink.gif" alt="Links" title="Links" name="link"></a>
+<a href="mailto:info@eetlijst.nl" OnMouseOver="Aan2('mail');return true;" OnMouseOut="Uit2('mail');return true;"><img src="bolmail.gif" alt="Mail Eetlijst.nl" title="Mail Eetlijst.nl" name="mail"></a>
+</td></tr></table>
+  </td>
+  <td class="br"></td>
+</tr><tr>
+  <td class="l" valign="top" width="15"><img src="borderlo.gif"></td>
+  <td class="bb" colspan="5"></td>
+  <td class="r" valign="top" width="13"><img src="borderro.gif"></td>
+</tr></table>
+</tr></table>
+</center></div>
+</body>
+</html>

@@ -1,29 +1,57 @@
 from bs4 import BeautifulSoup
+
 from datetime import datetime, timedelta
 
 import requests
 import urlparse
-import collections
 import re
 
-JAVASCRIPT_VS_1 = re.compile("javascript:vs")
+BASE_URL = "http://www.eetlijst.nl/"
+
+TIMEOUT_SESSION = 60 * 5
+TIMEOUT_CACHE = 60 * 5 / 2
+
+JAVASCRIPT_VS_1 = re.compile(r"javascript:vs")
 JAVASCRIPT_VS_2 = re.compile(r"javascript:vs\(([0-9]*)\);")
 JAVASCRIPT_K = re.compile(r"javascript:k\(([0-9]*),([-0-9]*),([-0-9]*)\);")
 
-def timeout(minutes):
-    return datetime.now() + timedelta(seconds=60 * minutes)
+def timeout(seconds):
+    """
+    Helper to calculate datetime for now plus some seconds.
+    """
+    return datetime.now() + timedelta(seconds=seconds)
 
-class EetlijstException(Exception):
+class Error(Exception):
+    """
+    Base Eetlijst error.
+    """
     pass
 
-class EetlijstStatusRow(object):
-    def __init__(self, timestamp, has_deadline, statuses):
+class LoginError(Error):
+    """
+    Error class for bad logins.
+    """
+    pass
+
+class SessionError(Error):
+    """
+    Error class for session and/or other errors.
+    """
+    pass
+
+class StatusRow(object):
+    """
+    """
+
+    __slots__ = ["timestamp", "deadline", "statuses"]
+
+    def __init__(self, timestamp, deadline, statuses):
         self.timestamp = timestamp
-        self.has_deadline = has_deadline
+        self.deadline = deadline
         self.statuses = statuses
 
     def has_deadline_passed(self):
-        return self.timestamp < datetime.now() if self.has_deadline else False
+        return self.timestamp < datetime.now() if self.deadline else False
 
     def has_cook(self):
         for value in self.statuses.itervalues():
@@ -67,49 +95,88 @@ class EetlijstStatusRow(object):
         return result
 
 class Eetlijst(object):
-    def __init__(self, username, password):
+    """
+    """
+
+    __slots__ = ["username", "password", "session", "cache"]
+
+    def __init__(self, username, password, login=False):
+        """
+        Construct a new Eetlijst object. By default, login is deferred until
+        the first action is executed.
+        """
+
         self.username = username
         self.password = password
 
         self.session = None
         self.cache = {}
 
+        # Login if applicable.
+        if login:
+            self._get_session()
+
     def clear_cache(self):
+        """
+        Clear the internal cache and reset session.
+        """
+
+        self.session = None
         self.cache = {}
 
-    def is_valid_login(self):
-        if self.session is None:
-            return not self._login() == False
-        else:
-            return self.session != False
+    def get_session_id(self):
+        """
+        Return the current session id. If not session id is not available, then
+        None will be returned.
+        """
+
+        return self._get_session()
 
     def get_name(self):
+        """
+        Get the name of the Eetlijst list.
+        """
+
         response = self._main_page()
 
         # Grap the list name
-        soup = BeautifulSoup(response.content, "html.parser")
-        return soup.find(["head", "title"]).replace("Eetlijst.nl - ", "")
+        soup = self._get_soup(response.content)
+        return soup.find(["head", "title"]).text.replace("Eetlijst.nl - ", "", 1).strip()
 
     def get_residents(self):
+        """
+        Return all users listed on the Eetlijst list. It does not account for
+        users that have been deleted.
+        """
+
         response = self._main_page()
 
         # Find all names
-        soup = BeautifulSoup(response.content, "html.parser")
+        soup = self._get_soup(response.content)
         residents = soup.find_all(["th", "a"], title=re.compile("Meer informatie over"))
-        return [ str(x.nobr.b.text) for x in residents ]
+        return [ x.nobr.b.text for x in residents ]
 
-    def get_notice_board(self):
+    def get_noticeboard(self):
+        """
+        Return the content of the noticeboard. It removes any formatting and/or
+        links.
+        """
+
         response = self._main_page()
 
         # Grap the notice board
-        soup = BeautifulSoup(response.content, "html.parser")
-        return str(soup.find("a", title="Klik hier als je het prikbord wilt aanpassen").text)
+        soup = self._get_soup(response.content)
+        return soup.find("a", title="Klik hier als je het prikbord wilt aanpassen").text
 
     def get_statuses(self, limit=None):
+        """
+        Return the diner status of the residents for one or multiple days.
+        """
+
         response = self._main_page()
 
         # Grap the statuses
-        soup = BeautifulSoup(response.content, "html.parser")
+        soup = self._get_soup(response.content)
         start = soup.find(["table", "tbody", "tr", "th"], width="80")
 
         if not start:
@@ -127,7 +194,7 @@ class Eetlijst(object):
 
         for row in rows:
             # Check for limit
-            if not limit is None and i >= limit:
+            if limit is not None and i >= limit:
                 break
 
             # Skip header rows
@@ -157,7 +224,7 @@ class Eetlijst(object):
                     continue
 
                 # Count statuses
-                cell = str(cell)
+                cell = cell.text()
                 nop = cell.count("nop.gif")
                 kook = cell.count("kook.gif")
                 eet = cell.count("eet.gif")
@@ -178,82 +245,88 @@ class Eetlijst(object):
                 elif leeg > 0:
                     statuses[resident] = -5;
 
-            results.append(EetlijstStatusRow(timestamp=timestamp, has_deadline=has_deadline, statuses=statuses))
+            results.append(StatusRow(timestamp=timestamp, deadline=has_deadline, statuses=statuses))
             i = i + 1
 
-        # Done
         return results
+
+    def _get_soup(self, content):
+        return BeautifulSoup(content, "html.parser")
+
+    def _from_cache(self, key):
+        try:
+            response, valid_until = self.cache[key]
+        except KeyError:
+            return None
+
+        return response if datetime.now() < valid_until else None
 
     def _login(self):
         # Make request
         payload = { "login": self.username, "pass": self.password }
-        response = requests.get("http://www.eetlijst.nl/login.php", params=payload)
+        response = requests.get(BASE_URL + "login.php", params=payload)
 
         # Check for errors
         if response.status_code != 200:
-            raise EetlijstException("Unexpected status code: %d" % response.status_code)
+            raise SessionError("Unexpected status code: %d" % response.status_code)
 
         if "r=failed" in response.url:
-            self.session = False
-            return False
+            raise LoginError("Unable to login. Username and/or password incorrect.")
 
         # Get session parameter
         query_string = urlparse.urlparse(response.url).query
         query_array = urlparse.parse_qs(query_string)
 
-        self.session = (query_array.get("session_id", False), timeout(minutes=5))
+        self.session = (query_array.get("session_id"), timeout(seconds=TIMEOUT_SESSION))
 
-        # Done
-        return True
+        # Login redirects to main page, so cache it
+        self.cache["main_page"] = (response, timeout(seconds=TIMEOUT_CACHE))
 
-    def _get_session(self, is_retry=False):
+    def _get_session(self, is_retry=False, renew=True):
+        # Start a session if required.
         if self.session is None:
-            self._login()
+            if not renew:
+                return
 
-        # Check if login and/or password invalid
-        if self.session == False:
-            raise EetlijstException("Unable to login.")
+            self._login()
 
         # Check if session is still valid
         session, valid_until = self.session
 
         if valid_until < datetime.now():
+            if not renew:
+                return
+
             if not is_retry:
                 self.session = None
                 return self._get_session(is_retry=True)
             else:
-                raise EetlijstException("Unable to renew session.")
+                raise SessionError("Unable to renew session.")
 
-        # Done
-        return session
+        return session[0]
 
     def _main_page(self, is_retry=False):
-        # Return from cache if possible
-        if "main_page" in self.cache:
-            response, valid_until = self.cache["main_page"]
-
-            if datetime.now() < valid_until:
-                return response
-
-        # Make request
+        # The login page redirects to main page, so it is sufficient to have a
+        # valid session. If not, it will trigger a login action, which will lead
+        # to a new main page.
         payload = { "session_id": self._get_session() }
-        response = requests.get("http://www.eetlijst.nl/main.php", params=payload)
+        response = self._from_cache("main_page") or requests.get(BASE_URL + "main.php", params=payload)
 
         # Check for errors
         if response.status_code != 200:
-            raise EetlijstException("Unexpected status code: %d" % response.status_code)
+            raise SessionError("Unexpected status code: %d" % response.status_code)
 
+        # Session expired
         if "login.php" in response.url:
-            # Unset data
-            self.session = None
-            del self.cache["main_page"]
+            self.clear_cache()
 
             # Determine to retry or not
             if is_retry:
-                raise EetlijstException("Unable to retrieve page: main.php")
+                raise SessionError("Unable to retrieve page: main.php")
             else:
                 return self._main_page(is_retry=True)
 
-        # Done
-        self.cache["main_page"] = (response, timeout(minutes=5))
+        self.session = (self.session[0], timeout(seconds=TIMEOUT_SESSION))
+        self.cache["main_page"] = (response, timeout(seconds=TIMEOUT_CACHE))
+
         return response
