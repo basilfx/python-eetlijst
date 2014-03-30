@@ -1,3 +1,5 @@
+from datetime import datetime, date
+
 import unittest
 
 import os
@@ -27,8 +29,8 @@ class MockResponse(object):
 class EetlijstTest(unittest.TestCase):
     """
     Test cases for `eetlijst.py'. The module `requests' is monkey patched to
-    mimic the actual requests. In addition, the number of requests is logged to
-    track all cach hits or misses.
+    mimic results of actual requests. In addition, the number of requests is
+    logged to track all cach hits or misses.
 
     GET requests should be put in `self.test_get_response' and POST requests in
     `self.test_post_response'. Since responses are popped, they should be in
@@ -227,3 +229,41 @@ class EetlijstTest(unittest.TestCase):
         residents = client.get_residents()
 
         self.assertListEqual(residents, [u"Unknown1", u"Unknown2", u"Unknown3", u"Unknown4", u"Unknown5"])
+        self.assertEqual(self.counter, 1)
+
+    def test_statuses(self):
+        """
+        Test residents diner statuses
+        """
+
+        self.test_get_response = [
+            MockResponse.from_file("test_main.html", url="http://www.eetlijst.nl/main.php?session_id=bc731753a2d0fecccf12518759108b5b")
+        ]
+
+        client = eetlijst.Eetlijst(username="test", password="test")
+        rows = client.get_statuses(limit=2)
+
+        self.assertListEqual([ status.value for status in rows[0].statuses], [-1, -1, -1, -1, -1])
+        self.assertListEqual([ status.value for status in rows[1].statuses], [1, -3, 0, 0, 0])
+        self.assertEqual(rows[0].date, date(year=2014, month=3, day=29))
+        self.assertEqual(rows[0].deadline, None)
+        self.assertEqual(rows[0].is_deadline_passed(), False)
+        self.assertEqual(self.counter, 1)
+
+    def test_statuses_deadline(self):
+        """
+        Test residents diner statuses with a deadline
+        """
+
+        self.test_get_response = [
+            MockResponse.from_file("test_main3.html", url="http://www.eetlijst.nl/main.php?session_id=bc731753a2d0fecccf12518759108b5b")
+        ]
+
+        client = eetlijst.Eetlijst(username="test", password="test")
+        rows = client.get_statuses(limit=1)
+
+        self.assertListEqual([ status.value for status in rows[0].statuses], [1, -3, 0, 0, 0])
+        self.assertEqual(rows[0].date, date(year=2014, month=3, day=30))
+        self.assertEqual(rows[0].deadline, datetime(year=2014, month=3, day=30, hour=0, minute=0, second=0))
+        self.assertEqual(rows[0].is_deadline_passed(), True)
+        self.assertEqual(self.counter, 1)
