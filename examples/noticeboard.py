@@ -12,7 +12,7 @@ def main():
         return 0
 
     # Parse action
-    action = sys.argv[1].lower()
+    action = sys.argv[3].lower()
 
     if action not in ["get", "set"]:
         sys.stdout.write("Invalid action: %s\n" % action)
@@ -20,28 +20,34 @@ def main():
 
     # Create a client
     try:
-        client = eetlijst.Eetlijst(username=sys.argv[2], password=sys.argv[3], login=True)
+        client = eetlijst.Eetlijst(username=sys.argv[1], password=sys.argv[2], login=True)
     except eetlijst.LoginError:
         sys.stderr.write("Username and/or password incorrect\n")
         return 1
 
     # Perform action
     if action == "get":
-        sys.stdout.write("%s\n" % client.get_noticeboard())
+        get_action(client)
     else:
-        sys.stdout.write("Type a new noticeboard message: ")
-        sys.stdout.flush()
-
-        message = sys.stdin.readline().strip()
-
-        if len(message) == 0:
-            sys.stdout.write("Empty message. Noticeboard not changed\n")
-            return 1
-
-        client.set_noticeboard(message)
-        sys.stdout.write("Notice board updated\n")
+        set_action(client)
 
     return 0
+
+def get_action(client):
+    sys.stdout.write("%s\n" % client.get_noticeboard())
+
+def set_action(client):
+    sys.stdout.write("Type a new noticeboard message: ")
+    sys.stdout.flush()
+
+    message = sys.stdin.readline().strip()
+
+    if len(message) == 0:
+        sys.stdout.write("Empty message. Noticeboard not changed\n")
+        return 1
+
+    client.set_noticeboard(message)
+    sys.stdout.write("Notice board updated\n")
 
 # E.g. `noticeboard.py get username password'
 if __name__ == "__main__":
