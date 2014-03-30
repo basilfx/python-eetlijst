@@ -1,3 +1,8 @@
+# Python API to interface with Eetlijst.
+# Copyright (C) 2014 Bas Stottelaar
+
+# See the LICENSE file for the full GPLv3 license
+
 from bs4 import BeautifulSoup
 
 from datetime import datetime, timedelta
@@ -237,7 +242,7 @@ class Eetlijst(object):
         None will be returned.
         """
 
-        return self._get_session()
+        return self._get_session(renew=False)
 
     def get_name(self):
         """

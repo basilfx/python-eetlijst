@@ -80,6 +80,31 @@ class EetlijstTest(unittest.TestCase):
         with self.assertRaises(eetlijst.LoginError):
             client = eetlijst.Eetlijst(username="test", password="invalid", login=True)
 
+    def test_clear_cache(self):
+        """
+        Test clear cache.
+        """
+
+        self.test_get_response = [
+            MockResponse.from_file("test_main.html", url="http://www.eetlijst.nl/main.php?session_id=bc731753a2d0fecccf12518759108b5b"),
+            MockResponse.from_file("test_main.html", url="http://www.eetlijst.nl/main.php?session_id=99ee78cf04dbea386a90b57743411b3d")
+        ]
+
+        client = eetlijst.Eetlijst(username="test", password="test", login=True)
+
+        self.assertEqual(client.get_session_id(), "99ee78cf04dbea386a90b57743411b3d")
+        self.assertEqual(self.counter, 1)
+
+        client.clear_cache()
+
+        self.assertEqual(client.get_session_id(), None)
+        self.assertEqual(self.counter, 1)
+
+        client.get_noticeboard()
+
+        self.assertEqual(client.get_session_id(), "bc731753a2d0fecccf12518759108b5b")
+        self.assertEqual(self.counter, 2)
+
     def test_timeout_session(self):
         """
         Test session timeout and renewal.
@@ -285,6 +310,6 @@ class EetlijstTest(unittest.TestCase):
 
         self.assertEqual(rows[0].date, date(year=2014, month=3, day=30))
         self.assertEqual(rows[0].deadline, datetime(year=2014, month=3, day=30, hour=0, minute=0, second=0))
-        self.assertEqual(rows[0].is_deadline_passed(), True)
+        self.assertEqual(rows[0].has_deadline_passed(), True)
 
         self.assertEqual(self.counter, 1)
