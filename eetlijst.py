@@ -11,9 +11,10 @@ BASE_URL = "http://www.eetlijst.nl/"
 TIMEOUT_SESSION = 60 * 5
 TIMEOUT_CACHE = 60 * 5 / 2
 
-JAVASCRIPT_VS_1 = re.compile(r"javascript:vs")
-JAVASCRIPT_VS_2 = re.compile(r"javascript:vs\(([0-9]*)\);")
-JAVASCRIPT_K = re.compile(r"javascript:k\(([0-9]*),([-0-9]*),([-0-9]*)\);")
+RE_JAVASCRIPT_VS_1 = re.compile(r"javascript:vs")
+RE_JAVASCRIPT_VS_2 = re.compile(r"javascript:vs\(([0-9]*)\);")
+RE_JAVASCRIPT_K = re.compile(r"javascript:k\(([0-9]*),([-0-9]*),([-0-9]*)\);")
+RE_RESIDENTS = re.compile("Meer informatie over")
 
 def timeout(seconds):
     """
@@ -153,12 +154,12 @@ class Eetlijst(object):
 
         # Find all names
         soup = self._get_soup(response.content)
-        residents = soup.find_all(["th", "a"], title=re.compile("Meer informatie over"))
+        residents = soup.find_all(["th", "a"], title=RE_RESIDENTS)
         return [ x.nobr.b.text for x in residents ]
 
     def get_noticeboard(self):
         """
-        Return the content of the noticeboard. It removes any formatting and/or
+        Return the contents of the noticeboard. It removes any formatting and/or
         links.
         """
 
@@ -167,6 +168,13 @@ class Eetlijst(object):
         # Grap the notice board
         soup = self._get_soup(response.content)
         return soup.find("a", title="Klik hier als je het prikbord wilt aanpassen").text
+
+    def set_noticeboard(self, message):
+        """
+        Update the contents of the noticeboard.
+        """
+
+        self._main_page(post=True, data={ "messageboard": message })
 
     def get_statuses(self, limit=None):
         """
@@ -203,14 +211,14 @@ class Eetlijst(object):
 
             # Check for deadline
             if i == 0:
-                has_deadline = len(row.find(["td", "a"], href=JAVASCRIPT_VS_1) or []) == 1
+                has_deadline = len(row.find(["td", "a"], href=RE_JAVASCRIPT_VS_1) or []) == 1
 
             if has_deadline:
                 start = 2
-                pattern = JAVASCRIPT_VS_2
+                pattern = RE_JAVASCRIPT_VS_2
             else:
                 start = 1
-                pattern = JAVASCRIPT_K
+                pattern = RE_JAVASCRIPT_K
 
             # Match deadline
             matches = re.search(pattern, str(row))
@@ -262,7 +270,7 @@ class Eetlijst(object):
         return response if datetime.now() < valid_until else None
 
     def _login(self):
-        # Make request
+        # Create request
         payload = { "login": self.username, "pass": self.password }
         response = requests.get(BASE_URL + "login.php", params=payload)
 
@@ -283,7 +291,7 @@ class Eetlijst(object):
         self.cache["main_page"] = (response, timeout(seconds=TIMEOUT_CACHE))
 
     def _get_session(self, is_retry=False, renew=True):
-        # Start a session if required.
+        # Start a session
         if self.session is None:
             if not renew:
                 return
@@ -297,20 +305,35 @@ class Eetlijst(object):
             if not renew:
                 return
 
-            if not is_retry:
+            if is_retry:
+                raise SessionError("Unable to renew session.")
+            else:
                 self.session = None
                 return self._get_session(is_retry=True)
-            else:
-                raise SessionError("Unable to renew session.")
 
         return session[0]
 
-    def _main_page(self, is_retry=False):
-        # The login page redirects to main page, so it is sufficient to have a
-        # valid session. If not, it will trigger a login action, which will lead
-        # to a new main page.
-        payload = { "session_id": self._get_session() }
-        response = self._from_cache("main_page") or requests.get(BASE_URL + "main.php", params=payload)
+    def _main_page(self, is_retry=False, data={}, post=False):
+        # Prepare request
+        if post:
+            payload = {
+                "session_id": self._get_session(),
+                "messageboard": "",
+                "veranderdag": "",
+                "nieuwetijd": "",
+                "submittype": 2,
+                "who": -1,
+                "what": -1,
+                "day": []
+            }
+            payload.update(data)
+
+            response = requests.post(BASE_URL + "main.php", data=payload)
+        else:
+            payload = { "session_id": self._get_session() }
+            payload.update(data)
+
+            response = self._from_cache("main_page") or requests.get(BASE_URL + "main.php", params=payload)
 
         # Check for errors
         if response.status_code != 200:
@@ -324,8 +347,9 @@ class Eetlijst(object):
             if is_retry:
                 raise SessionError("Unable to retrieve page: main.php")
             else:
-                return self._main_page(is_retry=True)
+                return self._main_page(is_retry=True, data=data, post=post)
 
+        # Update cache and session
         self.session = (self.session[0], timeout(seconds=TIMEOUT_SESSION))
         self.cache["main_page"] = (response, timeout(seconds=TIMEOUT_CACHE))
 

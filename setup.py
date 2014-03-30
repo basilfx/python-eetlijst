@@ -1,4 +1,7 @@
-from distutils.core import setup
+try:
+    from setuptools import setup
+except ImportError:
+    from distutils.core import setup
 
 # Setup definitions
 setup(
@@ -11,6 +14,7 @@ setup(
     install_requires=["requests", "beautifulsoup4"],
     license = "GPLv3",
     keywords = "python eetlijst api",
+    test_suite="tests",
     classifiers = [
         "Development Status :: 5 - Production/Stable",
         "Intended Audience :: Developers",
