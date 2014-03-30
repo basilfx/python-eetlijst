@@ -7,7 +7,7 @@ except ImportError:
 setup(
     name="python-eetlijst",
     version="1.0",
-    description="Basic Python API for Eetlijst.",
+    description="Unofficial Python API to interface with Eetlijst.nl",
     author="Bas Stottelaar",
     author_email="basstottelaar@gmail.com",
     py_modules=["eetlijst"],

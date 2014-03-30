@@ -1,4 +1,4 @@
-# Python API to interface with Eetlijst.
+# Unofficial Python API to interface with Eetlijst.nl
 # Copyright (C) 2014 Bas Stottelaar
 
 # See the LICENSE file for the full GPLv3 license

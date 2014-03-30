@@ -33,16 +33,16 @@ def main():
 
 def get_action(client):
     residents = client.get_residents()
-    status = client.get_statuses(limit=1)[0]
+    row = client.get_statuses(limit=1)[0]
 
     # Print a small header
-    sys.stdout.write("Diner status for %s. " % status.date)
+    sys.stdout.write("Diner status for %s. " % row.date)
 
-    if status.deadline:
-        if status.has_deadline_passed():
-            sys.stdout.write("The deadline is %s, and has passed.\n\n" % status.deadline.time())
+    if row.deadline:
+        if row.has_deadline_passed():
+            sys.stdout.write("The deadline is %s, and has passed.\n\n" % row.deadline.time())
         else:
-            sys.stdout.write("The deadline is %s, so there is %s left.\n\n" % (status.deadline.time(), status.time_left()))
+            sys.stdout.write("The deadline is %s, so there is %s left.\n\n" % (row.deadline.time(), row.time_left()))
     else:
         sys.stdout.write("There is no deadline.\n\n")
 
@@ -50,7 +50,7 @@ def get_action(client):
     names = []
     values = []
 
-    for name, status in zip(residents, status.statuses):
+    for name, status in zip(residents, row.statuses):
         # Convert to meaningful representation
         if status.value == 0:
             value = "X"
@@ -63,7 +63,7 @@ def get_action(client):
         elif status.value > 1:
             value = "C + %d" % (status.value - 1)
         elif status.value < -1:
-            value = "D + %d" % (status.value - 1)
+            value = "D + %d" % (-1 * status.value - 1)
 
         # Add to rows
         width = max(len(name), len(value))
@@ -72,10 +72,12 @@ def get_action(client):
         values.append(value.center(width))
 
     # Print it all
+    sys.stdout.write("In total, %d people (including guests) will attend diner.\n\n" % row.get_count())
+
     sys.stdout.write(" | ".join(names) + "\n")
     sys.stdout.write(" | ".join(values) + "\n\n")
 
-    sys.stdout.write("X = No, C = Cooks, D = Takes diner, ? = Unknown\n")
+    sys.stdout.write("X = No, C = Cook, D = Diner, ? = Unknown\n")
 
 # E.g. `diner.py username password get'
 if __name__ == "__main__":
