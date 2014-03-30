@@ -14,7 +14,8 @@ TIMEOUT_CACHE = 60 * 5 / 2
 RE_JAVASCRIPT_VS_1 = re.compile(r"javascript:vs")
 RE_JAVASCRIPT_VS_2 = re.compile(r"javascript:vs\(([0-9]*)\);")
 RE_JAVASCRIPT_K = re.compile(r"javascript:k\(([0-9]*),([-0-9]*),([-0-9]*)\);")
-RE_RESIDENTS = re.compile("Meer informatie over")
+RE_RESIDENTS = re.compile(r"Meer informatie over")
+RE_LAST_CHANGED = re.compile(r"onveranderd sinds ([0-9]+):([0-9]+)")
 
 def timeout(seconds):
     """
@@ -40,30 +41,55 @@ class SessionError(Error):
     """
     pass
 
+class ScrapingError(Error):
+    """
+    Error class for scraping related errors.
+    """
+    pass
+
+class Status(object):
+    """
+    """
+
+    __slots__ = ["value", "last_changed"]
+
+    def __init__(self, value, last_changed):
+        self.value = value
+        self.last_changed = last_changed
+
+    def __repr__(self):
+        return "<value=%d last_changed=%s>" % (self.value, self.last_changed)
+
 class StatusRow(object):
     """
     """
 
-    __slots__ = ["timestamp", "deadline", "statuses"]
+    __slots__ = ["date", "deadline", "statuses"]
 
-    def __init__(self, timestamp, deadline, statuses):
-        self.timestamp = timestamp
+    def __init__(self, date, deadline, statuses):
+        self.date = date
         self.deadline = deadline
         self.statuses = statuses
 
-    def has_deadline_passed(self):
-        return self.timestamp < datetime.now() if self.deadline else False
+    def is_deadline_passed(self):
+        return self.deadline < datetime.now() if self.deadline else False
+
+    def time_left(self):
+        if self.deadline:
+            return self.deadline - datetime.now()
+        else:
+            return datetime(year=self.date.year, month=self.date.month, day=self.date.day, hour=23, minute=59, second=59) - datetime.now()
 
     def has_cook(self):
-        for value in self.statuses.itervalues():
-            if value > 0:
+        for status in self.statuses:
+            if status.value > 0:
                 return True
 
         return False
 
     def has_diner_guests(self):
-        for value in self.statuses.itervalues():
-            if value < 0 and not value == -5:
+        for status in self.statuses:
+            if status.value < 0 and not status.value == -5:
                 return True
 
         return False
@@ -71,27 +97,27 @@ class StatusRow(object):
     def get_cooks(self):
         result = []
 
-        for key, value in self.statuses.iteritems():
-            if value > 0:
-                result.append((key, value - 1))
+        for index, status in enumerate(self.statuses):
+            if status.value > 0:
+                result.append(index)
 
         return result
 
     def get_nones(self):
         result = []
 
-        for key, value in self.statuses.iteritems():
-            if value == 0:
-                result.append((key, 0))
+        for index, status in enumerate(self.statuses):
+            if status.value == 0:
+                result.append(index)
 
         return result
 
     def get_diner_guests(self):
         result = []
 
-        for key, value in self.statuses.iteritems():
+        for index, status in enumerate(self.statuses):
             if value < 0 and not value == -5:
-                result.append((key, -1 * value - 1))
+                result.append(index)
 
         return result
 
@@ -183,35 +209,33 @@ class Eetlijst(object):
 
         response = self._main_page()
 
-        # Grap the statuses
+        # Find the main table by first navigating to a unique cell.
         soup = self._get_soup(response.content)
         start = soup.find(["table", "tbody", "tr", "th"], width="80")
 
         if not start:
-            return None
+            raise ScrapingError("Cannot parse status table")
 
-        # Grap the table
         rows = start.parent.parent.find_all("tr")
 
-        # Other initialisation
+        # Iterate over each status row
         has_deadline = False
         pattern = None
         results = []
         start = 0
-        i = 0
 
         for row in rows:
             # Check for limit
-            if limit is not None and i >= limit:
+            if limit and len(results) >= limit:
                 break
 
             # Skip header rows
             if len(row.find_all("th")) > 0:
                 continue
 
-            # Check for deadline
-            if i == 0:
-                has_deadline = len(row.find(["td", "a"], href=RE_JAVASCRIPT_VS_1) or []) == 1
+            # Check if the list uses deadlines
+            if len(results) == 0:
+                has_deadline = bool(row.find(["td", "a"], href=RE_JAVASCRIPT_VS_1))
 
             if has_deadline:
                 start = 2
@@ -220,41 +244,58 @@ class Eetlijst(object):
                 start = 1
                 pattern = RE_JAVASCRIPT_K
 
-            # Match deadline
-            matches = re.search(pattern, str(row))
+            # Match date and deadline
+            matches = re.search(pattern, row.renderContents())
             timestamp = datetime.fromtimestamp(int(matches.group(1)))
-            statuses = {}
-            index = 0
+            date = timestamp.date()
+            deadline = timestamp if has_deadline else None
 
-            for cell in row.find_all("td"):
-                index = index + 1
-                if not index > start:
+            # Parse each cell for diner status
+            statuses = []
+
+            for index, cell in enumerate(row.find_all("td")):
+                if index < start:
                     continue
 
                 # Count statuses
-                cell = cell.text()
-                nop = cell.count("nop.gif")
-                kook = cell.count("kook.gif")
-                eet = cell.count("eet.gif")
-                leeg = cell.count("leeg.gif")
+                images = cell.renderContents()
 
-                # Get the resident index
-                resident = index - start - 1
+                nop = images.count("nop.gif")
+                kook = images.count("kook.gif")
+                eet = images.count("eet.gif")
+                leeg = images.count("leeg.gif")
+
+                # Parse last changed. This only works for the first row
+                if len(results) == 0:
+                    #import pudb; pu.db
+                    title = cell.find("img")["title"].lower()
+                    matches = re.search(RE_LAST_CHANGED, title)
+
+                    if matches:
+                        hour, minute = matches.groups()
+                        last_changed = datetime(year=date.year, month=date.month, day=date.day, hour=int(hour), minute=int(minute))
+                    else:
+                        last_changed = datetime(year=date.year, month=date.month, day=date.day, hour=0, minute=0)
+                else:
+                    last_changed = None
 
                 # Set the data
                 if nop > 0:
-                    statuses[resident] = 0;
+                    value = 0
                 elif kook > 0 and eet == 0:
-                    statuses[resident] = kook;
+                    value = kook
                 elif kook > 0 and eet > 0:
-                    statuses[resident] = kook + eet;
+                    value = kook + eet
                 elif eet > 0:
-                    statuses[resident] = -1 * eet;
+                    value = -1 * eet
                 elif leeg > 0:
-                    statuses[resident] = -5;
+                    value = -5
+                else:
+                    raise ScrapingError("Cannot parse diner status")
 
-            results.append(StatusRow(timestamp=timestamp, deadline=has_deadline, statuses=statuses))
-            i = i + 1
+                statuses.append(Status(value=value, last_changed=last_changed))
+
+            results.append(StatusRow(date=date, deadline=deadline, statuses=statuses))
 
         return results
 
