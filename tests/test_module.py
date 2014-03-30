@@ -245,9 +245,30 @@ class EetlijstTest(unittest.TestCase):
 
         self.assertListEqual([ status.value for status in rows[0].statuses], [-1, -1, -1, -1, -1])
         self.assertListEqual([ status.value for status in rows[1].statuses], [1, -3, 0, 0, 0])
+
         self.assertEqual(rows[0].date, date(year=2014, month=3, day=29))
         self.assertEqual(rows[0].deadline, None)
-        self.assertEqual(rows[0].is_deadline_passed(), False)
+        self.assertEqual(rows[0].has_deadline_passed(), False)
+
+        self.assertEqual(rows[0].has_cook(), False)
+        self.assertEqual(rows[1].has_cook(), True)
+        self.assertEqual(rows[0].has_diners(), True)
+        self.assertEqual(rows[1].has_diners(), True)
+        self.assertListEqual(rows[0].get_cooks(), [])
+        self.assertListEqual(rows[1].get_cooks(), [0])
+        self.assertListEqual(rows[0].get_nones(), [])
+        self.assertListEqual(rows[1].get_nones(), [2, 3, 4])
+        self.assertListEqual(rows[0].get_diners(), [0, 1, 2, 3, 4])
+        self.assertListEqual(rows[1].get_diners(), [1])
+        self.assertListEqual(rows[0].get_diners_and_cooks(), [0, 1, 2, 3, 4])
+        self.assertListEqual(rows[1].get_diners_and_cooks(), [0, 1])
+        self.assertEqual(rows[0].get_count(), 5)
+        self.assertEqual(rows[1].get_count(), 4)
+        self.assertEqual(rows[0].get_count(rows[0].get_cooks()), 0)
+        self.assertEqual(rows[1].get_count(rows[1].get_cooks()), 1)
+        self.assertEqual(rows[0].get_count(rows[0].get_diners()), 5)
+        self.assertEqual(rows[1].get_count(rows[1].get_diners()), 3)
+
         self.assertEqual(self.counter, 1)
 
     def test_statuses_deadline(self):
@@ -262,8 +283,8 @@ class EetlijstTest(unittest.TestCase):
         client = eetlijst.Eetlijst(username="test", password="test")
         rows = client.get_statuses(limit=1)
 
-        self.assertListEqual([ status.value for status in rows[0].statuses], [1, -3, 0, 0, 0])
         self.assertEqual(rows[0].date, date(year=2014, month=3, day=30))
         self.assertEqual(rows[0].deadline, datetime(year=2014, month=3, day=30, hour=0, minute=0, second=0))
         self.assertEqual(rows[0].is_deadline_passed(), True)
+
         self.assertEqual(self.counter, 1)

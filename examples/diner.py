@@ -39,7 +39,7 @@ def get_action(client):
     sys.stdout.write("Diner status for %s. " % status.date)
 
     if status.deadline:
-        if status.is_deadline_passed():
+        if status.has_deadline_passed():
             sys.stdout.write("The deadline is %s, and has passed.\n\n" % status.deadline.time())
         else:
             sys.stdout.write("The deadline is %s, so there is %s left.\n\n" % (status.deadline.time(), status.time_left()))

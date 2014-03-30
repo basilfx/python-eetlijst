@@ -49,6 +49,7 @@ class ScrapingError(Error):
 
 class Status(object):
     """
+    Represent one cell in a row of the dinner status table.
     """
 
     __slots__ = ["value", "last_changed"]
@@ -62,6 +63,7 @@ class Status(object):
 
 class StatusRow(object):
     """
+    Represent one row of the dinner status table.
     """
 
     __slots__ = ["date", "deadline", "statuses"]
@@ -71,55 +73,133 @@ class StatusRow(object):
         self.deadline = deadline
         self.statuses = statuses
 
-    def is_deadline_passed(self):
+    def has_deadline_passed(self):
+        """
+        Return True if the deadline has passed, False if not or if no deadline.
+        """
+
         return self.deadline < datetime.now() if self.deadline else False
 
     def time_left(self):
+        """
+        Calculate the delta time between now and the deadline. May return a
+        negative number. In this case, the deadline has passed. If no deadline
+        is given, then midnight is taken.
+        """
+
         if self.deadline:
             return self.deadline - datetime.now()
         else:
             return datetime(year=self.date.year, month=self.date.month, day=self.date.day, hour=23, minute=59, second=59) - datetime.now()
 
     def has_cook(self):
-        for status in self.statuses:
-            if status.value > 0:
-                return True
+        """
+        Return True if there is at least one cook
+        """
 
-        return False
+        return self._test(lambda x: x.value > 0)
 
-    def has_diner_guests(self):
-        for status in self.statuses:
-            if status.value < 0 and not status.value == -5:
-                return True
+    def has_diners(self):
+        """
+        Return true if there is at least one diner (which isn't a cook)
+        """
 
-        return False
+        return self._test(lambda x: x.value < 0 and x.value != -5)
 
     def get_cooks(self):
-        result = []
+        """
+        Return a list of indices of all cooks
+        """
 
-        for index, status in enumerate(self.statuses):
-            if status.value > 0:
-                result.append(index)
+        return self._extract(lambda x: x.value > 0)
 
-        return result
+    def get_diners(self):
+        """
+        Return a list of indices of all diners (which aren't cooks)
+        """
+
+        return self._extract(lambda x: x.value < 0 and x.value != -5)
+
+    def get_diners_and_cooks(self):
+        """
+        Return a list of indices of all diners and cooks.
+        """
+
+        return self.get_cooks() + self.get_diners()
 
     def get_nones(self):
+        """
+        Return a list of indices of ones not attending dinner.
+        """
+
+        return self._extract(lambda x: x.value == 0)
+
+    def get_unknowns(self):
+        """
+        Return a list of indices of ones who haven't made choice yet
+        """
+
+        return self._extract(lambda x: x.value == -5)
+
+    def get_nones_and_unknowns(self):
+        """
+        Return a list of indices of ones not attending dinner and who haven't
+        made a choice yet.
+        """
+
+        return self.get_nones() + self.get_unknowns()
+
+    def get_count(self, indices=None):
+        """
+        Count the number of people attending dinner. This may include guests.
+
+        Optionally, a list of indices can be passed to limit the result.
+        """
+
+        count = 0
+
+        if indices is not None:
+            statuses = [ self.statuses[index] for index in indices ]
+        else:
+            statuses = self.statuses
+
+        for status in statuses:
+            value = status.value
+
+            if value < 0 and value != -5:
+                count += -1 * value
+            elif value > 0:
+                count += value
+
+        return count
+
+    def get_statuses(self, indices=None):
+        """
+        Return the statuses.
+
+        Optionally, a list of indices can be passed to limit the result.
+        """
+
+        if indices is not None:
+            return [ self.statuses[index] for index in indices ]
+        else:
+            return self.statuses
+
+    def _extract(self, test_func):
         result = []
 
         for index, status in enumerate(self.statuses):
-            if status.value == 0:
+            if test_func(status):
                 result.append(index)
 
         return result
 
-    def get_diner_guests(self):
-        result = []
+    def _test(self, test_func):
+        for status in self.statuses:
+            if test_func(status):
+                return True
 
-        for index, status in enumerate(self.statuses):
-            if value < 0 and not value == -5:
-                result.append(index)
-
-        return result
+        return False
 
 class Eetlijst(object):
     """
