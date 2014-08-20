@@ -12,7 +12,7 @@ Current features include:
 To install this module, run `pip install python-eetlijst` to install from Pip. If you prefer to install the latest version from Github, you can clone this repository and run `python setup.py install`.
 
 ## Examples
-Two examples are included in the `examples/` folder. The purpose is to demonstrate some functionality.
+Three examples are included in the `examples/` folder. The purpose is to demonstrate some functionality.
 
 ### dinner.py
 Print the current dinner status, in a terminal window. Run it with `diner.py <username> <password> get`.
