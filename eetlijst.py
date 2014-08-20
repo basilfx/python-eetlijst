@@ -9,6 +9,7 @@ from datetime import datetime, timedelta
 
 import requests
 import urlparse
+import time
 import re
 
 BASE_URL = "http://www.eetlijst.nl/"
@@ -54,7 +55,15 @@ class ScrapingError(Error):
 
 class Status(object):
     """
-    Represent one cell in a row of the dinner status table.
+    Represent one cell in a row of the dinner status table. A status is an
+    integer value, where:
+
+    -5 -> Nothing set
+    -N -> Diner + N
+    -1 -> Diner
+     0 -> No dinner
+     1 -> Cook
+     N -> Cook + N
     """
 
     __slots__ = ["value", "last_changed"]
@@ -69,19 +78,20 @@ class Status(object):
 
 class StatusRow(object):
     """
-    Represent one row of the dinner status table.
+    Represent one row of the dinner status table. A status row has a timestamp,
+    a deadline and a list of statuses (resident -> status).
     """
 
-    __slots__ = ["date", "deadline", "statuses"]
+    __slots__ = ["timestamp", "deadline", "statuses"]
 
-    def __init__(self, date, deadline, statuses):
-        self.date = date
+    def __init__(self, timestamp, deadline, statuses):
+        self.timestamp = timestamp
         self.deadline = deadline
         self.statuses = statuses
 
     def __repr__(self):
-        return "StatusRow(date=%s, deadline=%s, statuses=%s)" % (self.date,
-            self.deadline, self.statuses)
+        return "StatusRow(timestamp=%s, deadline=%s, statuses=%s)" % (
+            self.timestamp, self.deadline, self.statuses)
 
     def has_deadline_passed(self):
         """
@@ -97,11 +107,11 @@ class StatusRow(object):
         is given, then midnight is taken.
         """
 
-        if self.deadline:
-            return self.deadline - datetime.now()
+        timestamp = self.deadline or datetime(
+            year=self.timestamp.year, month=self.timestamp.month,
+            day=self.timestamp.day, hour=23, minute=59, second=59)
 
-        return datetime(year=self.date.year, month=self.date.month,
-            day=self.date.day, hour=23, minute=59, second=59) - datetime.now()
+        return timestamp - datetime.now()
 
     def has_cook(self):
         """
@@ -312,9 +322,32 @@ class Eetlijst(object):
 
         self._main_page(post=True, data={ "messageboard": message })
 
+    def set_status(self, resident_index, status, timestamp):
+        """
+        Set the status for a given resident_index and timestamp in the future.
+        The timestamp should point to an extact row in the Eetlijst list.
+        """
+
+        if timestamp < datetime.now():
+            raise ValueError("Timestamp cannot be in the past")
+
+        self._main_page(post=True, data={ "submittype": 0,
+            "who": resident_index, "what": status,
+            "day[]": time.mktime(timestamp.timetuple()) })
+
+    def get_status(self, resident_index, timestamp):
+        """
+        Return the status for a given date in the future. The timestamp should
+        point to an extact row in the Eetlijst list.
+        """
+
+        raise NotImplementedError("Method noty yet implemented")
+
     def get_statuses(self, limit=None):
         """
-        Return the diner status of the residents for one or multiple days.
+        Return the diner status of the residents for one or multiple days,
+        starting today. The result is a list of StatusRows, where each row
+        represents the Eetlijst list.
         """
 
         response = self._main_page()
@@ -358,7 +391,6 @@ class Eetlijst(object):
             # Match date and deadline
             matches = re.search(pattern, row.renderContents())
             timestamp = datetime.fromtimestamp(int(matches.group(1)))
-            date = timestamp.date()
             deadline = timestamp if has_deadline else None
 
             # Parse each cell for diner status
@@ -378,6 +410,7 @@ class Eetlijst(object):
 
                 # Parse last changed. This only works for the first row
                 if len(results) == 0:
+                    date = timestamp.date()
                     title = cell.find("img")["title"].lower()
                     matches = re.search(RE_LAST_CHANGED, title)
 
@@ -408,8 +441,9 @@ class Eetlijst(object):
 
                 statuses.append(Status(value=value, last_changed=last_changed))
 
-            results.append(StatusRow(date=date, deadline=deadline,
+            results.append(StatusRow(timestamp=timestamp, deadline=deadline,
                 statuses=statuses))
+
         return results
 
     def _get_soup(self, content):
@@ -488,7 +522,9 @@ class Eetlijst(object):
                 "submittype": 2,
                 "who": -1,
                 "what": -1,
-                "day": []
+                "day": [],
+                "submitwithform.x": 20,
+                "submitwithform.y": 20
             }
             payload.update(data)
 

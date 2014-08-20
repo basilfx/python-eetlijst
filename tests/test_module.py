@@ -37,7 +37,7 @@ class EetlijstTest(unittest.TestCase):
     reverse order!
 
     The test cases only test scraping and session management. Actual HTTP
-    requests are not tested.
+    requests are not send, so not tested.
     """
 
     def setUp(self):
@@ -324,7 +324,7 @@ class EetlijstTest(unittest.TestCase):
         self.assertListEqual([ status.value for status in rows[0].statuses], [-1, -1, -1, -1, -1])
         self.assertListEqual([ status.value for status in rows[1].statuses], [1, -3, 0, 0, 0])
 
-        self.assertEqual(rows[0].date, date(year=2014, month=3, day=29))
+        self.assertEqual(rows[0].timestamp, datetime(year=2014, month=3, day=29, minute=0, second=0))
         self.assertEqual(rows[0].deadline, None)
         self.assertEqual(rows[0].has_deadline_passed(), False)
 
@@ -361,8 +361,24 @@ class EetlijstTest(unittest.TestCase):
         client = eetlijst.Eetlijst(username="test", password="test")
         rows = client.get_statuses(limit=1)
 
-        self.assertEqual(rows[0].date, date(year=2014, month=3, day=30))
+        self.assertEqual(rows[0].timestamp, datetime(year=2014, month=3, day=30, hour=0, minute=0, second=0))
         self.assertEqual(rows[0].deadline, datetime(year=2014, month=3, day=30, hour=0, minute=0, second=0))
         self.assertEqual(rows[0].has_deadline_passed(), True)
 
         self.assertEqual(self.counter, 1)
+
+    def test_statuses_get(self):
+        """
+        Test getting status for specific dates
+        """
+
+        # TODO
+        self.assertEqual(True, False)
+
+    def test_statuses_set(self):
+        """
+        Test setting status for specific date
+        """
+
+        # TODO
+        self.assertEqual(True, False)
