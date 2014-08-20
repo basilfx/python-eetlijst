@@ -8,7 +8,7 @@ import sys
 
 def main():
     if len(sys.argv) != 4:
-        sys.stdout.write("Usage: %s <username> <password> <get>\n" % sys.argv[0])
+        sys.stdout.write("Usage: %s <username> <password> <get|set>\n" % sys.argv[0])
         return 0
 
     # Parse action
@@ -72,13 +72,13 @@ def get_action(client):
         values.append(value.center(width))
 
     # Print it all
-    sys.stdout.write("In total, %d people (including guests) will attend diner.\n\n" % row.get_count())
+    sys.stdout.write("In total, %d people (including guests) will attend dinner.\n\n" % row.get_count())
 
     sys.stdout.write(" | ".join(names) + "\n")
     sys.stdout.write(" | ".join(values) + "\n\n")
 
     sys.stdout.write("X = No, C = Cook, D = Diner, ? = Unknown\n")
 
-# E.g. `diner.py username password get'
+# E.g. `dinner.py username password get'
 if __name__ == "__main__":
     sys.exit(main())

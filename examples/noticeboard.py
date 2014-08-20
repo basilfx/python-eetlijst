@@ -8,7 +8,7 @@ import sys
 
 def main():
     if len(sys.argv) != 4:
-        sys.stdout.write("Usage: %s <get|set> <username> <password>\n" % sys.argv[0])
+        sys.stdout.write("Usage: %s <username> <password> <get|set>\n" % sys.argv[0])
         return 0
 
     # Parse action
