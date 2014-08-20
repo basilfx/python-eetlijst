@@ -9,7 +9,7 @@ Current features include:
 * Get the dinner status
 
 ## Installation
-To install this module, run `pip install python-eetlijst` to install from Pip. If you prefer to install the latest version from Github, you can clone this repository and run `python setup.py install`.
+To install this module, run `pip install python-eetlijst` to install from Pip. If you prefer to install the latest version from Github, use `pip install git+https://github.com/basilfx/python-eetlijst`.
 
 ## Examples
 Three examples are included in the `examples/` folder. The purpose is to demonstrate some functionality.
