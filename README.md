@@ -14,13 +14,13 @@ To install this module, run `pip install python-eetlijst` to install from Pip. I
 ## Examples
 Two examples are included in the `examples/` folder. The purpose is to demonstrate some functionality.
 
-### diner.py
+### dinner.py
 Print the current dinner status, in a terminal window. Run it with `diner.py <username> <password> get`.
 
 It should print something similar to this:
 
 ```
-Diner status for 2014-03-30. The deadline is 16:00:00, and has passed.
+Dinner status for 2014-03-30. The deadline is 16:00:00, and has passed.
 
 In total, 4 people (including guests) will attend diner.
 
@@ -32,6 +32,9 @@ X = No, C = Cook, D = Dinner, ? = Unknown
 
 ### noticeboard.py
 View or change the current noticeboard. Run it with `noticeboard.py <username> <password> get|set`.
+
+### session.py
+Given a session id, print the name of the Eetlijst list. Run it with `session.py <session_id>`
 
 ## Tests
 Currently, basic tests have been written. These tests only verify the 'scraping' functionality and correct sesision handling, by faking responses. However, they do not test any submit functionality, since it would require an active connection with Eetlijst.nl during the tests.

@@ -36,7 +36,7 @@ def get_action(client):
     row = client.get_statuses(limit=1)[0]
 
     # Print a small header
-    sys.stdout.write("Diner status for %s. " % row.date)
+    sys.stdout.write("Dinner status for %s. " % row.date)
 
     if row.deadline:
         if row.has_deadline_passed():
