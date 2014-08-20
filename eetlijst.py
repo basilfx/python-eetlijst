@@ -209,6 +209,7 @@ class StatusRow(object):
 
 class Eetlijst(object):
     """
+    Eetlijst base class.
     """
 
     __slots__ = ["username", "password", "session", "cache"]
