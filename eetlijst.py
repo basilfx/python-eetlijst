@@ -213,11 +213,20 @@ class Eetlijst(object):
 
     __slots__ = ["username", "password", "session", "cache"]
 
-    def __init__(self, username, password, login=False):
+    def __init__(self, username=None, password=None, session_id=None,
+        login=False):
         """
         Construct a new Eetlijst object. By default, login is deferred until
         the first action is executed.
+
+        A username and password should be given to construct a session. Setting
+        login=True will directly login and get a session id. Additionally, a
+        session_id can be given a id that is known to be valid. Having
+        login=True in this case will test the session id.
         """
+
+        if username is None and password is None and session_id is None:
+            raise LoginError("No username/password or session id provided.")
 
         self.username = username
         self.password = password
@@ -225,9 +234,16 @@ class Eetlijst(object):
         self.session = None
         self.cache = {}
 
-        # Login if applicable.
-        if login:
-            self._get_session()
+        # Store given session id
+        if session_id:
+            self.session = (session_id, timeout(seconds=TIMEOUT_SESSION))
+
+            if login:
+                self._main_page()
+        else:
+            # Login if applicable
+            if login:
+                self._get_session()
 
     def clear_cache(self):
         """
@@ -356,7 +372,6 @@ class Eetlijst(object):
 
                 # Parse last changed. This only works for the first row
                 if len(results) == 0:
-                    #import pudb; pu.db
                     title = cell.find("img")["title"].lower()
                     matches = re.search(RE_LAST_CHANGED, title)
 
@@ -403,6 +418,10 @@ class Eetlijst(object):
         return response if datetime.now() < valid_until else None
 
     def _login(self):
+        # Verify username and password
+        if self.username is None and self.password is None:
+            raise LoginError("Cannot login without username/password.")
+
         # Create request
         payload = { "login": self.username, "pass": self.password }
         response = requests.get(BASE_URL + "login.php", params=payload)
@@ -420,8 +439,11 @@ class Eetlijst(object):
         query_string = urlparse.urlparse(response.url).query
         query_array = urlparse.parse_qs(query_string)
 
-        self.session = (query_array.get("session_id"),
-            timeout(seconds=TIMEOUT_SESSION))
+        try:
+            self.session = (query_array.get("session_id")[0],
+                timeout(seconds=TIMEOUT_SESSION))
+        except IndexError:
+            raise ScrapingError("Unable to strip session id from URL")
 
         # Login redirects to main page, so cache it
         self.cache["main_page"] = (response, timeout(seconds=TIMEOUT_CACHE))
@@ -447,7 +469,7 @@ class Eetlijst(object):
                 self.session = None
                 return self._get_session(is_retry=True)
 
-        return session[0]
+        return session
 
     def _main_page(self, is_retry=False, data={}, post=False):
         # Prepare request

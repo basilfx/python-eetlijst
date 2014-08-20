@@ -34,7 +34,7 @@ class EetlijstTest(unittest.TestCase):
 
     GET requests should be put in `self.test_get_response' and POST requests in
     `self.test_post_response'. Since responses are popped, they should be in
-    reverse order.
+    reverse order!
 
     The test cases only test scraping and session management. Actual HTTP
     requests are not tested.
@@ -67,6 +67,59 @@ class EetlijstTest(unittest.TestCase):
             client = eetlijst.Eetlijst(username="test", password="test", login=True)
         except eetlijst.LoginError:
             self.fail("LoginError raised")
+
+    def test_login_session(self):
+        """
+        Test login/continuation of existing session.
+        """
+
+        client = eetlijst.Eetlijst(session_id="bc731753a2d0fecccf12518759108b5b")
+
+        self.assertEqual(client.username, None)
+        self.assertEqual(client.password, None)
+        self.assertEqual(client.get_session_id(), "bc731753a2d0fecccf12518759108b5b")
+        self.assertEqual(self.counter, 0)
+
+    def test_login_session_renew(self):
+        """
+        Test login/continuation of existing session, where the session token is
+        invalid, but can be renewed via the username and password.
+        """
+
+        self.test_get_response = [
+            MockResponse.from_file("test_main.html", url="http://www.eetlijst.nl/main.php?session_id=bc731753a2d0fecccf12518759108b5b"),
+            MockResponse.from_file("test_login_failed.html", url="http://www.eetlijst.nl/login.php?r=failed")
+        ]
+
+        client = eetlijst.Eetlijst(username="test", password="test", session_id="99ee78cf04dbea386a90b57743411b3d", login=True)
+
+        self.assertEqual(self.counter, 2)
+
+    def test_login_session_failed(self):
+        """
+        Test unsuccesful login, where no username and password is provided, but
+        a login attempt is made.
+        """
+
+        self.test_get_response = [
+            MockResponse.from_file("test_login_failed.html", url="http://www.eetlijst.nl/login.php?r=failed")
+        ]
+
+        client = eetlijst.Eetlijst(session_id="bc731753a2d0fecccf12518759108b5b")
+
+        with self.assertRaises(eetlijst.LoginError):
+            client.get_name()
+
+        self.assertEqual(self.counter, 1)
+
+    def test_login_empty(self):
+        """
+        Test unsuccesful login, where no username and password is provided, nor
+        a session id.
+        """
+
+        with self.assertRaises(eetlijst.LoginError):
+            client = eetlijst.Eetlijst()
 
     def test_login_failed(self):
         """
