@@ -1,12 +1,9 @@
-try:
-    from setuptools import setup
-except ImportError:
-    from distutils.core import setup
+from distutils.core import setup
 
 # Setup definitions
 setup(
     name="python-eetlijst",
-    version="1.0",
+    version="1.1",
     description="Unofficial Python API to interface with Eetlijst.nl",
     author="Bas Stottelaar",
     author_email="basstottelaar@gmail.com",
