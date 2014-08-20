@@ -64,7 +64,8 @@ class Status(object):
         self.last_changed = last_changed
 
     def __repr__(self):
-        return "<value=%d last_changed=%s>" % (self.value, self.last_changed)
+        return "Status(value=%d, last_changed=%s)" % (self.value,
+            self.last_changed)
 
 class StatusRow(object):
     """
@@ -77,6 +78,10 @@ class StatusRow(object):
         self.date = date
         self.deadline = deadline
         self.statuses = statuses
+
+    def __repr__(self):
+        return "StatusRow(date=%s, deadline=%s, statuses=%s)" % (self.date,
+            self.deadline, self.statuses)
 
     def has_deadline_passed(self):
         """
