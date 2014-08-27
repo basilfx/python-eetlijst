@@ -3,10 +3,10 @@ Unofficial Python API for interfacing with Eetlijst.nl, a Dutch website used by 
 
 Current features include:
 
+* List all residents
 * Get name of the list
 * Get or set the noticeboard
-* List all residents
-* Get the dinner status
+* Get or set the dinner status
 
 ## Installation
 To install this module, run `pip install python-eetlijst` to install from Pip. If you prefer to install the latest version from Github, use `pip install git+https://github.com/basilfx/python-eetlijst`.

@@ -17,6 +17,7 @@ BASE_URL = "http://www.eetlijst.nl/"
 TIMEOUT_SESSION = 60 * 5
 TIMEOUT_CACHE = 60 * 5 / 2
 
+RE_DIGIT = re.compile("\d+")
 RE_JAVASCRIPT_VS_1 = re.compile(r"javascript:vs")
 RE_JAVASCRIPT_VS_2 = re.compile(r"javascript:vs\(([0-9]*)\);")
 RE_JAVASCRIPT_K = re.compile(r"javascript:k\(([0-9]*),([-0-9]*),([-0-9]*)\);")
@@ -55,15 +56,15 @@ class ScrapingError(Error):
 
 class Status(object):
     """
-    Represent one cell in a row of the dinner status table. A status is an
-    integer value, where:
+    Represent one cell in a row of the dinner status table. A status is a value,
+    where:
 
-    -5 -> Nothing set
-    -N -> Diner + N
-    -1 -> Diner
-     0 -> No dinner
-     1 -> Cook
-     N -> Cook + N
+    None -> Nothing set
+     -N  -> Diner + N
+     -1  -> Diner
+      0  -> No dinner
+     +1  -> Cook
+     +N  -> Cook + N
     """
 
     __slots__ = ["value", "last_changed"]
@@ -125,7 +126,7 @@ class StatusRow(object):
         Return true if there is at least one diner (which isn't a cook)
         """
 
-        return self._test(lambda x: x.value < 0 and x.value != -5)
+        return self._test(lambda x: x.value < 0 and x.value is not None)
 
     def get_cooks(self):
         """
@@ -139,7 +140,7 @@ class StatusRow(object):
         Return a list of indices of all diners (which aren't cooks)
         """
 
-        return self._extract(lambda x: x.value < 0 and x.value != -5)
+        return self._extract(lambda x: x.value < 0 and x.value is not None)
 
     def get_diners_and_cooks(self):
         """
@@ -160,7 +161,7 @@ class StatusRow(object):
         Return a list of indices of ones who haven't made choice yet
         """
 
-        return self._extract(lambda x: x.value == -5)
+        return self._extract(lambda x: x.value is None)
 
     def get_nones_and_unknowns(self):
         """
@@ -187,10 +188,11 @@ class StatusRow(object):
         for status in statuses:
             value = status.value
 
-            if value < 0 and value != -5:
-                count += -1 * value
-            elif value > 0:
-                count += value
+            if value is not None:
+                if value < 0:
+                    count += -1 * value
+                elif value > 0:
+                    count += value
 
         return count
 
@@ -408,6 +410,10 @@ class Eetlijst(object):
                 eet = images.count("eet.gif")
                 leeg = images.count("leeg.gif")
 
+                # Match numbers, in case there are more than 4 images
+                extra = RE_DIGIT.findall(cell.text)
+                extra = int(extra[0]) if extra else 1
+
                 # Parse last changed. This only works for the first row
                 if len(results) == 0:
                     date = timestamp.date()
@@ -431,11 +437,11 @@ class Eetlijst(object):
                 elif kook > 0 and eet == 0:
                     value = kook
                 elif kook > 0 and eet > 0:
-                    value = kook + eet
+                    value = kook + (eet * extra)
                 elif eet > 0:
-                    value = -1 * eet
+                    value = -1 * (eet * extra)
                 elif leeg > 0:
-                    value = -5
+                    value = None
                 else:
                     raise ScrapingError("Cannot parse diner status")
 

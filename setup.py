@@ -3,7 +3,7 @@ from distutils.core import setup
 # Setup definitions
 setup(
     name="python-eetlijst",
-    version="1.1",
+    version="1.2",
     description="Unofficial Python API to interface with Eetlijst.nl",
     author="Bas Stottelaar",
     author_email="basstottelaar@gmail.com",

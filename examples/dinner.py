@@ -36,7 +36,7 @@ def get_action(client):
     row = client.get_statuses(limit=1)[0]
 
     # Print a small header
-    sys.stdout.write("Dinner status for %s. " % row.date)
+    sys.stdout.write("Dinner status for %s. " % row.timestamp)
 
     if row.deadline:
         if row.has_deadline_passed():
@@ -52,10 +52,10 @@ def get_action(client):
 
     for name, status in zip(residents, row.statuses):
         # Convert to meaningful representation
-        if status.value == 0:
-            value = "X"
-        elif status.value == -5:
+        if status.value is None:
             value = "?"
+        elif status.value == 0:
+            value = "X"
         elif status.value == 1:
             value = "C"
         elif status.value == -1:
@@ -72,7 +72,7 @@ def get_action(client):
         values.append(value.center(width))
 
     # Print it all
-    sys.stdout.write("In total, %d people (including guests) will attend dinner.\n\n" % row.get_count())
+    sys.stdout.write("In total, %d people (including cooks and guests) will attend dinner.\n\n" % row.get_count())
 
     sys.stdout.write(" | ".join(names) + "\n")
     sys.stdout.write(" | ".join(values) + "\n\n")
