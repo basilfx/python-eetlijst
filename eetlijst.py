@@ -241,6 +241,11 @@ class Eetlijst(object):
         login=True will directly login and get a session id. Additionally, a
         session_id can be given a id that is known to be valid. Having
         login=True in this case will test the session id.
+
+        One big fat warning: this API is prone to race conditions. For instance,
+        reading data, wait a few seconds and writing it back may go wrong if
+        data has changed via other requests in the mean time. However, there is
+        not much that you can do about it.
         """
 
         if username is None and password is None and session_id is None:
@@ -324,7 +329,7 @@ class Eetlijst(object):
 
         self._main_page(post=True, data={ "messageboard": message })
 
-    def set_status(self, resident_index, status, timestamp):
+    def set_status(self, resident_index, value, timestamp):
         """
         Set the status for a given resident_index and timestamp in the future.
         The timestamp should point to an extact row in the Eetlijst list.
@@ -333,15 +338,39 @@ class Eetlijst(object):
         if timestamp < datetime.now():
             raise ValueError("Timestamp cannot be in the past")
 
-        self._main_page(post=True, data={ "submittype": 0,
-            "who": resident_index, "what": status,
-            "day[]": time.mktime(timestamp.timetuple()) })
+        # Pick strategy for advancing to value. Values other than -5, -4 and 4
+        # can be set without a problem, but the rest may require multiple steps.
+        def _request(what):
+            self._main_page(post=True, data={ "submittype": 0,
+                "who": resident_index, "what": what,
+                "day[]": time.mktime(timestamp.timetuple()) })
+
+        if value == -5:
+            _request(-3)
+            _request(-4)
+            _request(-4)
+        elif value == -4:
+            _request(-3)
+            _request(-4)
+        elif value == 4:
+            _request(3)
+            _request(4)
+        elif value == None:
+            _request(-5) # None corresponds to -5
+        else:
+            _request(value)
+
+        # TODO: add verification. Probably something like:
+        # self.get_status(resident_index, timestamp) == value
 
     def get_status(self, resident_index, timestamp):
         """
         Return the status for a given date in the future. The timestamp should
         point to an extact row in the Eetlijst list.
         """
+
+        if timestamp < datetime.now():
+            raise ValueError("Timestamp cannot be in the past")
 
         raise NotImplementedError("Method noty yet implemented")
 
