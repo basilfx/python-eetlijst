@@ -311,7 +311,7 @@ class EetlijstTest(unittest.TestCase):
 
     def test_statuses(self):
         """
-        Test residents diner statuses
+        Test residents dinner statuses
         """
 
         self.test_get_response = [
@@ -346,6 +346,31 @@ class EetlijstTest(unittest.TestCase):
         self.assertEqual(rows[1].get_count(rows[1].get_cooks()), 1)
         self.assertEqual(rows[0].get_count(rows[0].get_diners()), 5)
         self.assertEqual(rows[1].get_count(rows[1].get_diners()), 3)
+
+        self.assertEqual(self.counter, 1)
+
+    def test_statuses_extra(self):
+        """
+        Test resident dinner statuses when they exceed -4 or 4.
+        """
+
+        self.test_get_response = [
+            MockResponse.from_file("test_main4.html", url="http://www.eetlijst.nl/main.php?session_id=bc731753a2d0fecccf12518759108b5b")
+        ]
+
+        client = eetlijst.Eetlijst(username="test", password="test")
+        rows = client.get_statuses(limit=2)
+
+        self.assertListEqual([ status.value for status in rows[0].statuses], [-5, 11, -1, 1, 0])
+        self.assertListEqual([ status.value for status in rows[1].statuses], [None, None, None, None, None])
+
+        self.assertListEqual(rows[0].get_cooks(), [1, 3])
+        self.assertListEqual(rows[0].get_nones(), [4])
+        self.assertListEqual(rows[0].get_diners(), [0, 2])
+        self.assertListEqual(rows[0].get_diners_and_cooks(), [1, 3, 0, 2])
+        self.assertEqual(rows[0].get_count(), 18)
+        self.assertEqual(rows[0].get_count(rows[0].get_cooks()), 12)
+        self.assertEqual(rows[0].get_count(rows[0].get_diners()), 6)
 
         self.assertEqual(self.counter, 1)
 
