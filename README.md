@@ -15,9 +15,9 @@ To install this module, run `pip install python-eetlijst` to install from Pip. I
 Three examples are included in the `examples/` folder. The purpose is to demonstrate some functionality.
 
 ### dinner.py
-Print the current dinner status, in a terminal window. Run it with `diner.py <username> <password> get`.
+Print or set the current dinner status, in a terminal window. Run it with `diner.py <username> <password> get|set`.
 
-It should print something similar to this:
+It shall print something similar to this, when getting the current status:
 
 ```
 Dinner status for 2014-03-30. The deadline is 16:00:00, and has passed.

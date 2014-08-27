@@ -14,7 +14,7 @@ def main():
     # Parse action
     action = sys.argv[3].lower()
 
-    if action not in ["get"]:
+    if action not in ["get", "set"]:
         sys.stdout.write("Invalid action: %s\n" % action)
         return 1
 
@@ -28,8 +28,73 @@ def main():
     # Perform action
     if action == "get":
         get_action(client)
+    elif action == "set":
+        set_action(client)
 
     return 0
+
+def set_action(client):
+    residents = client.get_residents()
+    row = client.get_statuses(limit=1)[0]
+
+    if row.has_deadline_passed():
+        sys.stdout.write("The deadline is %s, and has passed. Changing status is not possible today.\n" % row.deadline.time())
+        return
+
+    # Print all residents
+    sys.stdout.write("Available residents:\n")
+
+    for index, resident in enumerate(residents):
+        sys.stdout.write("* %d: %s\n" % (index, resident))
+
+    # Read number until it's a valid one
+    while True:
+        sys.stdout.write("Pick a number: ")
+        sys.stdout.flush()
+
+        index = sys.stdin.readline().strip()
+
+        if len(index) == 0:
+            continue
+
+        # Try to parse it as valid integer
+        try:
+            index = int(index)
+            break
+        except ValueError:
+            continue
+
+    # Print mappings
+    sys.stdout.write("Available values:\n")
+    sys.stdout.write("* None: no status\n")
+    sys.stdout.write("* -N: take dinner\n")
+    sys.stdout.write("* 0: don't take dinner\n")
+    sys.stdout.write("* +N: take dinner and cook\n")
+
+    # Read value until it's a valid one
+    while True:
+        sys.stdout.write("Pick a value: ")
+        sys.stdout.flush()
+
+        value = sys.stdin.readline().strip().lower()
+
+        if len(value) == 0:
+            continue
+
+        if value == "none":
+            value = None
+            break
+        else:
+            try:
+                value = int(value)
+                break
+            except ValueError:
+                continue
+
+    # Set status
+    import pudb;pu.db
+    client.set_status(index, value, timestamp=row.timestamp)
+    sys.stdout.write("Value changed.\n")
 
 def get_action(client):
     residents = client.get_residents()
