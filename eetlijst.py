@@ -547,7 +547,10 @@ class Eetlijst(object):
 
         return session
 
-    def _main_page(self, is_retry=False, data={}, post=False):
+    def _main_page(self, is_retry=False, data=None, post=False):
+        if data is None:
+            data = {}
+
         # Prepare request
         if post:
             payload = {
