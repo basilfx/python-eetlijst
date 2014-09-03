@@ -7,8 +7,10 @@ from bs4 import BeautifulSoup
 
 from datetime import datetime, timedelta
 
+import dateutil.tz
 import requests
 import urlparse
+import pytz
 import time
 import re
 
@@ -24,11 +26,20 @@ RE_JAVASCRIPT_K = re.compile(r"javascript:k\(([0-9]*),([-0-9]*),([-0-9]*)\);")
 RE_RESIDENTS = re.compile(r"Meer informatie over")
 RE_LAST_CHANGED = re.compile(r"onveranderd sinds ([0-9]+):([0-9]+)")
 
+TZ_EETLIJST = pytz.timezone("Europe/Amsterdam")
+TZ_LOCAL = dateutil.tz.tzlocal()
+
+def now():
+    """
+    Return current datetime object for the TZ_LOCAL timezone.
+    """
+    return datetime.now(tz=TZ_LOCAL)
+
 def timeout(seconds):
     """
     Helper to calculate datetime for now plus some seconds.
     """
-    return datetime.now() + timedelta(seconds=seconds)
+    return now() + timedelta(seconds=seconds)
 
 class Error(Exception):
     """
@@ -99,7 +110,7 @@ class StatusRow(object):
         Return True if the deadline has passed, False if not or if no deadline.
         """
 
-        return self.deadline < datetime.now() if self.deadline else False
+        return self.deadline < now() if self.deadline else False
 
     def time_left(self):
         """
@@ -112,7 +123,7 @@ class StatusRow(object):
             year=self.timestamp.year, month=self.timestamp.month,
             day=self.timestamp.day, hour=23, minute=59, second=59)
 
-        return timestamp - datetime.now()
+        return timestamp - now()
 
     def has_cook(self):
         """
@@ -335,8 +346,11 @@ class Eetlijst(object):
         The timestamp should point to an extact row in the Eetlijst list.
         """
 
-        if timestamp < datetime.now():
+        if timestamp < now():
             raise ValueError("Timestamp cannot be in the past")
+
+        # Convert timestamp back to TZ_EETLIJST
+        timestamp = timestamp.astimezone(TZ_EETLIJST)
 
         # Pick strategy for advancing to value. Values other than -5, -4 and 4
         # can be set without a problem, but the rest may require multiple steps.
@@ -369,10 +383,10 @@ class Eetlijst(object):
         point to an extact row in the Eetlijst list.
         """
 
-        if timestamp < datetime.now():
+        if timestamp < now():
             raise ValueError("Timestamp cannot be in the past")
 
-        raise NotImplementedError("Method noty yet implemented")
+        raise NotImplementedError("Method not yet implemented")
 
     def get_statuses(self, limit=None):
         """
@@ -421,8 +435,8 @@ class Eetlijst(object):
 
             # Match date and deadline
             matches = re.search(pattern, row.renderContents())
-            timestamp = datetime.fromtimestamp(int(matches.group(1)))
-            deadline = timestamp if has_deadline else None
+            timestamp = datetime.fromtimestamp(int(matches.group(1)),
+                tz=TZ_EETLIJST)
 
             # Parse each cell for diner status
             statuses = []
@@ -453,10 +467,11 @@ class Eetlijst(object):
                         hour, minute = matches.groups()
                         last_changed = datetime(year=date.year,
                             month=date.month, day=date.day, hour=int(hour),
-                            minute=int(minute))
+                            minute=int(minute), tzinfo=TZ_EETLIJST)
                     else:
                         last_changed = datetime(year=date.year,
-                            month=date.month, day=date.day, hour=0, minute=0)
+                            month=date.month, day=date.day, hour=0, minute=0,
+                            tzinfo=TZ_EETLIJST)
                 else:
                     last_changed = None
 
@@ -474,8 +489,18 @@ class Eetlijst(object):
                 else:
                     raise ScrapingError("Cannot parse diner status")
 
+                # Conver last_changes to TZ_LOCAL timezone
+                if last_changed:
+                    last_changed = last_changed.astimezone(TZ_LOCAL)
+
+                # Append to results
                 statuses.append(Status(value=value, last_changed=last_changed))
 
+            # Convert timestamps to TZ_LOCAL timezone
+            timestamp = timestamp.astimezone(TZ_LOCAL)
+            deadline = timestamp if has_deadline else None
+
+            # Append to results
             results.append(StatusRow(timestamp=timestamp, deadline=deadline,
                 statuses=statuses))
 
@@ -490,7 +515,7 @@ class Eetlijst(object):
         except KeyError:
             return None
 
-        return response if datetime.now() < valid_until else None
+        return response if now() < valid_until else None
 
     def _login(self):
         # Verify username and password
@@ -535,7 +560,7 @@ class Eetlijst(object):
         # Check if session is still valid
         session, valid_until = self.session
 
-        if valid_until < datetime.now():
+        if valid_until < now():
             if not renew:
                 return
 

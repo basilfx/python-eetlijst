@@ -1,14 +1,14 @@
-from distutils.core import setup
+from setuptools import setup
 
 # Setup definitions
 setup(
     name="python-eetlijst",
-    version="1.2",
+    version="1.3",
     description="Unofficial Python API to interface with Eetlijst.nl",
     author="Bas Stottelaar",
     author_email="basstottelaar@gmail.com",
     py_modules=["eetlijst"],
-    install_requires=["requests", "beautifulsoup4"],
+    install_requires=["requests", "beautifulsoup4", "python-dateutil", "pytz"],
     license = "GPLv3",
     keywords = "python eetlijst api",
     test_suite="tests",

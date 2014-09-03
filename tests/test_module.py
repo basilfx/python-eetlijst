@@ -324,7 +324,7 @@ class EetlijstTest(unittest.TestCase):
         self.assertListEqual([ status.value for status in rows[0].statuses], [-1, -1, -1, -1, -1])
         self.assertListEqual([ status.value for status in rows[1].statuses], [1, -3, 0, 0, 0])
 
-        self.assertEqual(rows[0].timestamp, datetime(year=2014, month=3, day=29, minute=0, second=0))
+        self.assertEqual(rows[0].timestamp, datetime(year=2014, month=3, day=29, minute=0, second=0, tzinfo=eetlijst.TZ_LOCAL))
         self.assertEqual(rows[0].deadline, None)
         self.assertEqual(rows[0].has_deadline_passed(), False)
 
@@ -386,8 +386,8 @@ class EetlijstTest(unittest.TestCase):
         client = eetlijst.Eetlijst(username="test", password="test")
         rows = client.get_statuses(limit=1)
 
-        self.assertEqual(rows[0].timestamp, datetime(year=2014, month=3, day=30, hour=0, minute=0, second=0))
-        self.assertEqual(rows[0].deadline, datetime(year=2014, month=3, day=30, hour=0, minute=0, second=0))
+        self.assertEqual(rows[0].timestamp, datetime(year=2014, month=3, day=30, hour=0, minute=0, second=0, tzinfo=eetlijst.TZ_LOCAL))
+        self.assertEqual(rows[0].deadline, datetime(year=2014, month=3, day=30, hour=0, minute=0, second=0, tzinfo=eetlijst.TZ_LOCAL))
         self.assertEqual(rows[0].has_deadline_passed(), True)
 
         self.assertEqual(self.counter, 1)

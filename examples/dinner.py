@@ -92,7 +92,6 @@ def set_action(client):
                 continue
 
     # Set status
-    import pudb;pu.db
     client.set_status(index, value, timestamp=row.timestamp)
     sys.stdout.write("Value changed.\n")
 
