@@ -289,10 +289,10 @@ class Eetlijst(object):
         Get the name of the Eetlijst list.
         """
 
-        response = self._main_page()
+        content = self._main_page()
 
         # Grap the list name
-        soup = self._get_soup(response.content)
+        soup = self._get_soup(content)
         return soup.find(["head", "title"]) \
             .text.replace("Eetlijst.nl - ", "", 1).strip()
 
@@ -302,10 +302,10 @@ class Eetlijst(object):
         users that have been deleted.
         """
 
-        response = self._main_page()
+        content = self._main_page()
 
         # Find all names
-        soup = self._get_soup(response.content)
+        soup = self._get_soup(content)
         residents = soup.find_all(["th", "a"], title=RE_RESIDENTS)
         return [ x.nobr.b.text for x in residents ]
 
@@ -315,10 +315,10 @@ class Eetlijst(object):
         links.
         """
 
-        response = self._main_page()
+        content = self._main_page()
 
         # Grap the notice board
-        soup = self._get_soup(response.content)
+        soup = self._get_soup(content)
         return soup.find("a",
             title="Klik hier als je het prikbord wilt aanpassen").text
 
@@ -381,10 +381,10 @@ class Eetlijst(object):
         represents the Eetlijst list.
         """
 
-        response = self._main_page()
+        content = self._main_page()
 
         # Find the main table by first navigating to a unique cell.
-        soup = self._get_soup(response.content)
+        soup = self._get_soup(content)
         start = soup.find(["table", "tbody", "tr", "th"], width="80")
 
         if not start:
@@ -521,7 +521,8 @@ class Eetlijst(object):
             raise ScrapingError("Unable to strip session id from URL")
 
         # Login redirects to main page, so cache it
-        self.cache["main_page"] = (response, timeout(seconds=TIMEOUT_CACHE))
+        self.cache["main_page"] = (response.content,
+            timeout(seconds=TIMEOUT_CACHE))
 
     def _get_session(self, is_retry=False, renew=True):
         # Start a session
@@ -571,20 +572,24 @@ class Eetlijst(object):
             response = self._from_cache("main_page") or requests.get(
                 BASE_URL + "main.php", params=payload)
 
-        # Check for errors
-        if response.status_code != 200:
-            raise SessionError("Unexpected status code: %d" %
-                response.status_code)
+        if type(response) != str:
+            # Check for errors
+            if response.status_code != 200:
+                raise SessionError("Unexpected status code: %d" %
+                    response.status_code)
 
-        # Session expired
-        if "login.php" in response.url:
-            self.clear_cache()
+            # Session expired
+            if "login.php" in response.url:
+                self.clear_cache()
 
-            # Determine to retry or not
-            if is_retry:
-                raise SessionError("Unable to retrieve page: main.php")
-            else:
-                return self._main_page(is_retry=True, data=data, post=post)
+                # Determine to retry or not
+                if is_retry:
+                    raise SessionError("Unable to retrieve page: main.php")
+                else:
+                    return self._main_page(is_retry=True, data=data, post=post)
+
+            # Convert to string, we don't need the rest anymore
+            response = response.content
 
         # Update cache and session
         self.session = (self.session[0], timeout(seconds=TIMEOUT_SESSION))
