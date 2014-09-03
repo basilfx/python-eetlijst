@@ -10,7 +10,7 @@ setup(
     py_modules=["eetlijst"],
     install_requires=["requests", "beautifulsoup4", "python-dateutil", "pytz"],
     license = "GPLv3",
-    keywords = "python eetlijst api",
+    keywords = "python eetlijst api studenten",
     test_suite="tests",
     classifiers = [
         "Development Status :: 5 - Production/Stable",

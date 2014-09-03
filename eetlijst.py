@@ -16,15 +16,15 @@ import re
 
 BASE_URL = "http://www.eetlijst.nl/"
 
-TIMEOUT_SESSION = 60 * 5
-TIMEOUT_CACHE = 60 * 5 / 2
-
 RE_DIGIT = re.compile("\d+")
 RE_JAVASCRIPT_VS_1 = re.compile(r"javascript:vs")
 RE_JAVASCRIPT_VS_2 = re.compile(r"javascript:vs\(([0-9]*)\);")
 RE_JAVASCRIPT_K = re.compile(r"javascript:k\(([0-9]*),([-0-9]*),([-0-9]*)\);")
 RE_RESIDENTS = re.compile(r"Meer informatie over")
 RE_LAST_CHANGED = re.compile(r"onveranderd sinds ([0-9]+):([0-9]+)")
+
+TIMEOUT_SESSION = 60 * 5
+TIMEOUT_CACHE = 60 * 5 / 2
 
 TZ_EETLIJST = pytz.timezone("Europe/Amsterdam")
 TZ_LOCAL = dateutil.tz.tzlocal()
@@ -467,11 +467,11 @@ class Eetlijst(object):
                         hour, minute = matches.groups()
                         last_changed = datetime(year=date.year,
                             month=date.month, day=date.day, hour=int(hour),
-                            minute=int(minute), tzinfo=TZ_EETLIJST)
+                            minute=int(minute), tzinfo=TZ_LOCAL)
                     else:
                         last_changed = datetime(year=date.year,
                             month=date.month, day=date.day, hour=0, minute=0,
-                            tzinfo=TZ_EETLIJST)
+                            tzinfo=TZ_LOCAL)
                 else:
                     last_changed = None
 
@@ -488,10 +488,6 @@ class Eetlijst(object):
                     value = None
                 else:
                     raise ScrapingError("Cannot parse diner status")
-
-                # Conver last_changes to TZ_LOCAL timezone
-                if last_changed:
-                    last_changed = last_changed.astimezone(TZ_LOCAL)
 
                 # Append to results
                 statuses.append(Status(value=value, last_changed=last_changed))
