@@ -1,5 +1,5 @@
 # Unofficial Python API to interface with Eetlijst.nl
-# Copyright (C) 2014 Bas Stottelaar
+# Copyright (C) 2014-2015 Bas Stottelaar
 
 # See the LICENSE file for the full GPLv3 license
 
@@ -7,7 +7,6 @@ from bs4 import BeautifulSoup
 
 from datetime import datetime, timedelta
 
-import dateutil.tz
 import requests
 import urlparse
 import pytz
@@ -29,14 +28,14 @@ TIMEOUT_SESSION = 60 * 5
 TIMEOUT_CACHE = 60 * 5 / 2
 
 TZ_EETLIJST = pytz.timezone("Europe/Amsterdam")
-TZ_LOCAL = dateutil.tz.tzlocal()
+TZ_UTC = pytz.timezone("UTC")
 
 
 def now():
     """
-    Return current datetime object for the TZ_LOCAL timezone.
+    Return current datetime object with UTC timezone.
     """
-    return datetime.now(tz=TZ_LOCAL)
+    return datetime.now(tz=TZ_UTC)
 
 
 def timeout(seconds):
@@ -360,9 +359,6 @@ class Eetlijst(object):
         if timestamp < now():
             raise ValueError("Timestamp cannot be in the past")
 
-        # Convert timestamp back to TZ_EETLIJST
-        timestamp = timestamp.astimezone(TZ_EETLIJST)
-
         # Pick strategy for advancing to value. Values other than -5, -4 and 4
         # can be set without a problem, but the rest may require multiple
         # steps.
@@ -370,7 +366,7 @@ class Eetlijst(object):
             self._main_page(post=True, data={
                 "submittype": 0,
                 "who": resident_index, "what": what,
-                "day[]": time.mktime(timestamp.timetuple())
+                "day[]": time.mktime(timestamp.utctimetuple())
             })
 
         if value == -5:
@@ -450,7 +446,8 @@ class Eetlijst(object):
             # Match date and deadline
             matches = re.search(pattern, row.renderContents())
             timestamp = datetime.fromtimestamp(
-                int(matches.group(1)), tz=TZ_EETLIJST)
+                int(matches.group(1)), tz=TZ_UTC)
+            timestamp_eetlijst = timestamp.astimezone(TZ_EETLIJST)
 
             # Parse each cell for diner status
             statuses = []
@@ -471,22 +468,28 @@ class Eetlijst(object):
                 extra = RE_DIGIT.findall(cell.text)
                 extra = int(extra[0]) if extra else 1
 
-                # Parse last changed. This only works for the first row
+                # Parse last changed. This only works for the first row. Note
+                # that Eetlijst.nl is a dutch website and displays time in
+                # Europe/Amsterdam. Because time conversion is buggy, we take
+                # the UTC midnight, subtract the difference with
+                # Europe/Amsterdam for that day, and then add the hours and
+                # minutes to it. For some reason, converting Europe/Amsterdam
+                # back to UTC fails (see question at
+                # http://stackoverflow.com/a/5801263/1423623 for more info).
                 if len(results) == 0:
-                    date = timestamp.date()
-                    title = cell.find("img")["title"].lower()
-                    matches = re.search(RE_LAST_CHANGED, title)
+                    midnight = timestamp.replace(
+                        hour=0, minute=0, second=0, microsecond=0) - \
+                        timestamp_eetlijst.utcoffset()
+                    matches = re.search(RE_LAST_CHANGED, unicode(cell).lower())
 
                     if matches:
                         hour, minute = matches.groups()
-                        last_changed = datetime(
-                            year=date.year, month=date.month, day=date.day,
-                            hour=int(hour), minute=int(minute),
-                            tzinfo=TZ_LOCAL)
+                        last_changed = midnight + timedelta(
+                            seconds=int(hour) * 3600 + int(minute) * 60)
                     else:
-                        last_changed = datetime(
-                            year=date.year, month=date.month, day=date.day,
-                            hour=0, minute=0, tzinfo=TZ_LOCAL)
+                        last_changed = midnight
+
+                    last_changed = last_changed.astimezone(TZ_UTC)
                 else:
                     last_changed = None
 
@@ -502,18 +505,16 @@ class Eetlijst(object):
                 elif leeg > 0:
                     value = None
                 else:
-                    raise ScrapingError("Cannot parse diner status")
+                    raise ScrapingError("Cannot parse diner status.")
 
                 # Append to results
                 statuses.append(Status(value=value, last_changed=last_changed))
 
-            # Convert timestamps to TZ_LOCAL timezone
-            timestamp = timestamp.astimezone(TZ_LOCAL)
-            deadline = timestamp if has_deadline else None
-
             # Append to results
             results.append(StatusRow(
-                timestamp=timestamp, deadline=deadline, statuses=statuses))
+                timestamp=timestamp,
+                deadline=timestamp if has_deadline else None,
+                statuses=statuses))
 
         return results
 

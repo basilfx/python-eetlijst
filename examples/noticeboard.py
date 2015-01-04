@@ -31,8 +31,6 @@ def main():
     else:
         set_action(client)
 
-    return 0
-
 
 def get_action(client):
     sys.stdout.write("%s\n" % client.get_noticeboard())

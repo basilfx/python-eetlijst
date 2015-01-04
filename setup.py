@@ -8,7 +8,7 @@ setup(
     author="Bas Stottelaar",
     author_email="basstottelaar@gmail.com",
     py_modules=["eetlijst"],
-    install_requires=["requests", "beautifulsoup4", "python-dateutil", "pytz"],
+    install_requires=["requests", "beautifulsoup4", "pytz"],
     license="GPLv3",
     keywords="python eetlijst api studenten studentenhuizen",
     test_suite="tests",
