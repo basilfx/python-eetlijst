@@ -1,14 +1,13 @@
 #!/usr/bin/env python
 
-import sys, os
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), "../"))
-
 import eetlijst
 import sys
 
+
 def main():
     if len(sys.argv) != 4:
-        sys.stdout.write("Usage: %s <username> <password> <get|set>\n" % sys.argv[0])
+        sys.stdout.write(
+            "Usage: %s <username> <password> <get|set>\n" % sys.argv[0])
         return 0
 
     # Parse action
@@ -20,7 +19,8 @@ def main():
 
     # Create a client
     try:
-        client = eetlijst.Eetlijst(username=sys.argv[1], password=sys.argv[2], login=True)
+        client = eetlijst.Eetlijst(
+            username=sys.argv[1], password=sys.argv[2], login=True)
     except eetlijst.LoginError:
         sys.stderr.write("Username and/or password incorrect\n")
         return 1
@@ -33,8 +33,10 @@ def main():
 
     return 0
 
+
 def get_action(client):
     sys.stdout.write("%s\n" % client.get_noticeboard())
+
 
 def set_action(client):
     sys.stdout.write("Type a new noticeboard message: ")

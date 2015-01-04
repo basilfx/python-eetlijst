@@ -1,14 +1,13 @@
 #!/usr/bin/env python
 
-import sys, os
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), "../"))
-
 import eetlijst
 import sys
 
+
 def main():
     if len(sys.argv) != 4:
-        sys.stdout.write("Usage: %s <username> <password> <get|set>\n" % sys.argv[0])
+        sys.stdout.write(
+            "Usage: %s <username> <password> <get|set>\n" % sys.argv[0])
         return 0
 
     # Parse action
@@ -20,7 +19,8 @@ def main():
 
     # Create a client
     try:
-        client = eetlijst.Eetlijst(username=sys.argv[1], password=sys.argv[2], login=True)
+        client = eetlijst.Eetlijst(
+            username=sys.argv[1], password=sys.argv[2], login=True)
     except eetlijst.LoginError:
         sys.stderr.write("Username and/or password incorrect\n")
         return 1
@@ -31,14 +31,15 @@ def main():
     elif action == "set":
         set_action(client)
 
-    return 0
 
 def set_action(client):
     residents = client.get_residents()
     row = client.get_statuses(limit=1)[0]
 
     if row.has_deadline_passed():
-        sys.stdout.write("The deadline is %s, and has passed. Changing status is not possible today.\n" % row.deadline.time())
+        sys.stdout.write(
+            "The deadline is %s, and has passed. Changing status is not "
+            "possible today.\n" % row.deadline.time())
         return
 
     # Print all residents
@@ -95,6 +96,7 @@ def set_action(client):
     client.set_status(index, value, timestamp=row.timestamp)
     sys.stdout.write("Value changed.\n")
 
+
 def get_action(client):
     residents = client.get_residents()
     row = client.get_statuses(limit=1)[0]
@@ -104,9 +106,12 @@ def get_action(client):
 
     if row.deadline:
         if row.has_deadline_passed():
-            sys.stdout.write("The deadline is %s, and has passed.\n\n" % row.deadline.time())
+            sys.stdout.write(
+                "The deadline is %s, and has passed.\n\n" %
+                row.deadline.time())
         else:
-            sys.stdout.write("The deadline is %s, so there is %s left.\n\n" % (row.deadline.time(), row.time_left()))
+            sys.stdout.write("The deadline is %s, so there is %s left.\n\n" % (
+                row.deadline.time(), row.time_left()))
     else:
         sys.stdout.write("There is no deadline.\n\n")
 
@@ -136,7 +141,9 @@ def get_action(client):
         values.append(value.center(width))
 
     # Print it all
-    sys.stdout.write("In total, %d people (including cooks and guests) will attend dinner.\n\n" % row.get_count())
+    sys.stdout.write(
+        "In total, %d people (including cooks and guests) will attend "
+        "dinner.\n\n" % row.get_count())
 
     sys.stdout.write(" | ".join(names) + "\n")
     sys.stdout.write(" | ".join(values) + "\n\n")

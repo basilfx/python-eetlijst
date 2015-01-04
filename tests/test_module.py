@@ -1,11 +1,11 @@
-from datetime import datetime, date
-
-import unittest
+from datetime import datetime
 
 import os
 import time
 import requests
+import unittest
 import eetlijst
+
 
 class MockResponse(object):
     """
@@ -25,6 +25,7 @@ class MockResponse(object):
             content = fp.read()
 
         return MockResponse(content, status_code, url)
+
 
 class EetlijstTest(unittest.TestCase):
     """
@@ -64,7 +65,7 @@ class EetlijstTest(unittest.TestCase):
         ]
 
         try:
-            client = eetlijst.Eetlijst(username="test", password="test", login=True)
+            eetlijst.Eetlijst(username="test", password="test", login=True)
         except eetlijst.LoginError:
             self.fail("LoginError raised")
 
@@ -91,7 +92,7 @@ class EetlijstTest(unittest.TestCase):
             MockResponse.from_file("test_login_failed.html", url="http://www.eetlijst.nl/login.php?r=failed")
         ]
 
-        client = eetlijst.Eetlijst(username="test", password="test", session_id="99ee78cf04dbea386a90b57743411b3d", login=True)
+        eetlijst.Eetlijst(username="test", password="test", session_id="99ee78cf04dbea386a90b57743411b3d", login=True)
 
         self.assertEqual(self.counter, 2)
 
@@ -119,7 +120,7 @@ class EetlijstTest(unittest.TestCase):
         """
 
         with self.assertRaises(eetlijst.LoginError):
-            client = eetlijst.Eetlijst()
+            eetlijst.Eetlijst()
 
     def test_login_failed(self):
         """
@@ -131,7 +132,7 @@ class EetlijstTest(unittest.TestCase):
         ]
 
         with self.assertRaises(eetlijst.LoginError):
-            client = eetlijst.Eetlijst(username="test", password="invalid", login=True)
+            eetlijst.Eetlijst(username="test", password="invalid", login=True)
 
     def test_clear_cache(self):
         """
@@ -321,8 +322,8 @@ class EetlijstTest(unittest.TestCase):
         client = eetlijst.Eetlijst(username="test", password="test")
         rows = client.get_statuses(limit=2)
 
-        self.assertListEqual([ status.value for status in rows[0].statuses], [-1, -1, -1, -1, -1])
-        self.assertListEqual([ status.value for status in rows[1].statuses], [1, -3, 0, 0, 0])
+        self.assertListEqual([status.value for status in rows[0].statuses], [-1, -1, -1, -1, -1])
+        self.assertListEqual([status.value for status in rows[1].statuses], [1, -3, 0, 0, 0])
 
         self.assertEqual(rows[0].timestamp, datetime(year=2014, month=3, day=29, minute=0, second=0, tzinfo=eetlijst.TZ_LOCAL))
         self.assertEqual(rows[0].deadline, None)
@@ -361,8 +362,8 @@ class EetlijstTest(unittest.TestCase):
         client = eetlijst.Eetlijst(username="test", password="test")
         rows = client.get_statuses(limit=2)
 
-        self.assertListEqual([ status.value for status in rows[0].statuses], [-5, 11, -1, 1, 0])
-        self.assertListEqual([ status.value for status in rows[1].statuses], [None, None, None, None, None])
+        self.assertListEqual([status.value for status in rows[0].statuses], [-5, 11, -1, 1, 0])
+        self.assertListEqual([status.value for status in rows[1].statuses], [None, None, None, None, None])
 
         self.assertListEqual(rows[0].get_cooks(), [1, 3])
         self.assertListEqual(rows[0].get_nones(), [4])

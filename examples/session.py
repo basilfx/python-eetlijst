@@ -1,10 +1,8 @@
 #!/usr/bin/env python
 
-import sys, os
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), "../"))
-
 import eetlijst
 import sys
+
 
 def main():
     if len(sys.argv) != 2:
@@ -22,9 +20,8 @@ def main():
         return 1
 
     # Perform action
-    sys.stdout.write("Session id belongs to list with name '%s'.\n" % client.get_name())
-
-    return 0
+    sys.stdout.write(
+        "Session id belongs to list with name '%s'.\n" % client.get_name())
 
 # E.g. `session.py session_id'
 if __name__ == "__main__":

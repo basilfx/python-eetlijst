@@ -14,6 +14,8 @@ import pytz
 import time
 import re
 
+__version__ = "1.4.0"
+
 BASE_URL = "http://www.eetlijst.nl/"
 
 RE_DIGIT = re.compile("\d+")
@@ -29,11 +31,13 @@ TIMEOUT_CACHE = 60 * 5 / 2
 TZ_EETLIJST = pytz.timezone("Europe/Amsterdam")
 TZ_LOCAL = dateutil.tz.tzlocal()
 
+
 def now():
     """
     Return current datetime object for the TZ_LOCAL timezone.
     """
     return datetime.now(tz=TZ_LOCAL)
+
 
 def timeout(seconds):
     """
@@ -41,11 +45,13 @@ def timeout(seconds):
     """
     return now() + timedelta(seconds=seconds)
 
+
 class Error(Exception):
     """
     Base Eetlijst error.
     """
     pass
+
 
 class LoginError(Error):
     """
@@ -53,11 +59,13 @@ class LoginError(Error):
     """
     pass
 
+
 class SessionError(Error):
     """
     Error class for session and/or other errors.
     """
     pass
+
 
 class ScrapingError(Error):
     """
@@ -65,10 +73,11 @@ class ScrapingError(Error):
     """
     pass
 
+
 class Status(object):
     """
-    Represent one cell in a row of the dinner status table. A status is a value,
-    where:
+    Represent one cell in a row of the dinner status table. A status is a
+    value, where:
 
     None -> Nothing set
      -N  -> Diner + N
@@ -85,8 +94,9 @@ class Status(object):
         self.last_changed = last_changed
 
     def __repr__(self):
-        return "Status(value=%d, last_changed=%s)" % (self.value,
-            self.last_changed)
+        return "Status(value=%d, last_changed=%s)" % (
+            self.value, self.last_changed)
+
 
 class StatusRow(object):
     """
@@ -194,7 +204,7 @@ class StatusRow(object):
         if indices is None:
             statuses = self.statuses
         else:
-            statuses = [ self.statuses[index] for index in indices ]
+            statuses = [self.statuses[index] for index in indices]
 
         for status in statuses:
             value = status.value
@@ -217,7 +227,7 @@ class StatusRow(object):
         if indices is None:
             return self.statuses
         else:
-            return [ self.statuses[index] for index in indices ]
+            return [self.statuses[index] for index in indices]
 
     def _extract(self, test_func):
         result = []
@@ -235,6 +245,7 @@ class StatusRow(object):
 
         return False
 
+
 class Eetlijst(object):
     """
     Eetlijst base class.
@@ -243,7 +254,7 @@ class Eetlijst(object):
     __slots__ = ["username", "password", "session", "cache"]
 
     def __init__(self, username=None, password=None, session_id=None,
-        login=False):
+                 login=False):
         """
         Construct a new Eetlijst object. By default, login is deferred until
         the first action is executed.
@@ -253,10 +264,10 @@ class Eetlijst(object):
         session_id can be given a id that is known to be valid. Having
         login=True in this case will test the session id.
 
-        One big fat warning: this API is prone to race conditions. For instance,
-        reading data, wait a few seconds and writing it back may go wrong if
-        data has changed via other requests in the mean time. However, there is
-        not much that you can do about it.
+        One big fat warning: this API is prone to race conditions. For
+        instance, reading data, wait a few seconds and writing it back may go
+        wrong if data has changed via other requests in the mean time.
+        Unfortunately, there is not much that you can do about it.
         """
 
         if username is None and password is None and session_id is None:
@@ -318,27 +329,27 @@ class Eetlijst(object):
         # Find all names
         soup = self._get_soup(content)
         residents = soup.find_all(["th", "a"], title=RE_RESIDENTS)
-        return [ x.nobr.b.text for x in residents ]
+        return [x.nobr.b.text for x in residents]
 
     def get_noticeboard(self):
         """
-        Return the contents of the noticeboard. It removes any formatting and/or
-        links.
+        Return the contents of the noticeboard. It removes any formatting
+        and/or links.
         """
 
         content = self._main_page()
 
         # Grap the notice board
         soup = self._get_soup(content)
-        return soup.find("a",
-            title="Klik hier als je het prikbord wilt aanpassen").text
+        return soup.find(
+            "a", title="Klik hier als je het prikbord wilt aanpassen").text
 
     def set_noticeboard(self, message):
         """
         Update the contents of the noticeboard.
         """
 
-        self._main_page(post=True, data={ "messageboard": message })
+        self._main_page(post=True, data={"messageboard": message})
 
     def set_status(self, resident_index, value, timestamp):
         """
@@ -353,11 +364,14 @@ class Eetlijst(object):
         timestamp = timestamp.astimezone(TZ_EETLIJST)
 
         # Pick strategy for advancing to value. Values other than -5, -4 and 4
-        # can be set without a problem, but the rest may require multiple steps.
+        # can be set without a problem, but the rest may require multiple
+        # steps.
         def _request(what):
-            self._main_page(post=True, data={ "submittype": 0,
+            self._main_page(post=True, data={
+                "submittype": 0,
                 "who": resident_index, "what": what,
-                "day[]": time.mktime(timestamp.timetuple()) })
+                "day[]": time.mktime(timestamp.timetuple())
+            })
 
         if value == -5:
             _request(-3)
@@ -369,8 +383,8 @@ class Eetlijst(object):
         elif value == 4:
             _request(3)
             _request(4)
-        elif value == None:
-            _request(-5) # None corresponds to -5
+        elif value is None:
+            _request(-5)  # None corresponds to -5
         else:
             _request(value)
 
@@ -423,8 +437,8 @@ class Eetlijst(object):
 
             # Check if the list uses deadlines
             if len(results) == 0:
-                has_deadline = bool(row.find(["td", "a"],
-                    href=RE_JAVASCRIPT_VS_1))
+                has_deadline = bool(
+                    row.find(["td", "a"], href=RE_JAVASCRIPT_VS_1))
 
             if has_deadline:
                 start = 2
@@ -435,8 +449,8 @@ class Eetlijst(object):
 
             # Match date and deadline
             matches = re.search(pattern, row.renderContents())
-            timestamp = datetime.fromtimestamp(int(matches.group(1)),
-                tz=TZ_EETLIJST)
+            timestamp = datetime.fromtimestamp(
+                int(matches.group(1)), tz=TZ_EETLIJST)
 
             # Parse each cell for diner status
             statuses = []
@@ -465,13 +479,14 @@ class Eetlijst(object):
 
                     if matches:
                         hour, minute = matches.groups()
-                        last_changed = datetime(year=date.year,
-                            month=date.month, day=date.day, hour=int(hour),
-                            minute=int(minute), tzinfo=TZ_LOCAL)
-                    else:
-                        last_changed = datetime(year=date.year,
-                            month=date.month, day=date.day, hour=0, minute=0,
+                        last_changed = datetime(
+                            year=date.year, month=date.month, day=date.day,
+                            hour=int(hour), minute=int(minute),
                             tzinfo=TZ_LOCAL)
+                    else:
+                        last_changed = datetime(
+                            year=date.year, month=date.month, day=date.day,
+                            hour=0, minute=0, tzinfo=TZ_LOCAL)
                 else:
                     last_changed = None
 
@@ -497,8 +512,8 @@ class Eetlijst(object):
             deadline = timestamp if has_deadline else None
 
             # Append to results
-            results.append(StatusRow(timestamp=timestamp, deadline=deadline,
-                statuses=statuses))
+            results.append(StatusRow(
+                timestamp=timestamp, deadline=deadline, statuses=statuses))
 
         return results
 
@@ -519,31 +534,32 @@ class Eetlijst(object):
             raise LoginError("Cannot login without username/password.")
 
         # Create request
-        payload = { "login": self.username, "pass": self.password }
+        payload = {"login": self.username, "pass": self.password}
         response = requests.get(BASE_URL + "login.php", params=payload)
 
         # Check for errors
         if response.status_code != 200:
-            raise SessionError("Unexpected status code: %d" %
-                response.status_code)
+            raise SessionError(
+                "Unexpected status code: %d" % response.status_code)
 
         if "r=failed" in response.url:
-            raise LoginError("Unable to login. Username and/or " +
-                "password incorrect.")
+            raise LoginError(
+                "Unable to login. Username and/or password incorrect.")
 
         # Get session parameter
         query_string = urlparse.urlparse(response.url).query
         query_array = urlparse.parse_qs(query_string)
 
         try:
-            self.session = (query_array.get("session_id")[0],
+            self.session = (
+                query_array.get("session_id")[0],
                 timeout(seconds=TIMEOUT_SESSION))
         except IndexError:
             raise ScrapingError("Unable to strip session id from URL")
 
         # Login redirects to main page, so cache it
-        self.cache["main_page"] = (response.content,
-            timeout(seconds=TIMEOUT_CACHE))
+        self.cache["main_page"] = (
+            response.content, timeout(seconds=TIMEOUT_CACHE))
 
     def _get_session(self, is_retry=False, renew=True):
         # Start a session
@@ -590,7 +606,7 @@ class Eetlijst(object):
 
             response = requests.post(BASE_URL + "main.php", data=payload)
         else:
-            payload = { "session_id": self._get_session() }
+            payload = {"session_id": self._get_session()}
             payload.update(data)
 
             response = self._from_cache("main_page") or requests.get(
@@ -599,8 +615,8 @@ class Eetlijst(object):
         if type(response) != str:
             # Check for errors
             if response.status_code != 200:
-                raise SessionError("Unexpected status code: %d" %
-                    response.status_code)
+                raise SessionError(
+                    "Unexpected status code: %d" % response.status_code)
 
             # Session expired
             if "login.php" in response.url:
