@@ -1,6 +1,8 @@
 # Python-eetlijst
 Unofficial Python API for interfacing with Eetlijst.nl, a Dutch website used by students to manage dinner status and expenses.
 
+[![Build Status](https://travis-ci.org/basilfx/python-eetlijst.svg?branch=master)](https://travis-ci.org/basilfx/python-eetlijst)
+
 Current features include:
 
 * List all residents
