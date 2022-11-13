@@ -1,19 +1,20 @@
 # Unofficial Python API to interface with Eetlijst.nl
-# Copyright (C) 2014-2015 Bas Stottelaar
+# Copyright (C) 2014-2022 Bas Stottelaar
 
 # See the LICENSE file for the full GPLv3 license
 
+from typing import Callable, Optional, Union
 from bs4 import BeautifulSoup
 
 from datetime import datetime, timedelta
 
 import requests
-import urlparse
+import urllib.parse as urlparse
 import pytz
 import time
 import re
 
-__version__ = "1.4.0"
+__version__ = "2.0.0"
 
 BASE_URL = "http://www.eetlijst.nl/"
 
@@ -31,14 +32,14 @@ TZ_EETLIJST = pytz.timezone("Europe/Amsterdam")
 TZ_UTC = pytz.timezone("UTC")
 
 
-def now():
+def now() -> datetime:
     """
     Return current datetime object with UTC timezone.
     """
     return datetime.now(tz=TZ_UTC)
 
 
-def timeout(seconds):
+def timeout(seconds) -> datetime:
     """
     Helper to calculate datetime for now plus some seconds.
     """
@@ -86,13 +87,13 @@ class Status(object):
      +N  -> Cook + N
     """
 
-    __slots__ = ["value", "last_changed"]
+    __slots__ = ("value", "last_changed")
 
-    def __init__(self, value, last_changed):
+    def __init__(self, value, last_changed) -> None:
         self.value = value
         self.last_changed = last_changed
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return "Status(value=%d, last_changed=%s)" % (
             self.value, self.last_changed)
 
@@ -103,25 +104,25 @@ class StatusRow(object):
     a deadline and a list of statuses (resident -> status).
     """
 
-    __slots__ = ["timestamp", "deadline", "statuses"]
+    __slots__ = ("timestamp", "deadline", "statuses")
 
-    def __init__(self, timestamp, deadline, statuses):
+    def __init__(self, timestamp, deadline, statuses) -> None:
         self.timestamp = timestamp
         self.deadline = deadline
         self.statuses = statuses
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return "StatusRow(timestamp=%s, deadline=%s, statuses=%s)" % (
             self.timestamp, self.deadline, self.statuses)
 
-    def has_deadline_passed(self):
+    def has_deadline_passed(self) -> bool:
         """
         Return True if the deadline has passed, False if not or if no deadline.
         """
 
         return self.deadline < now() if self.deadline else False
 
-    def time_left(self):
+    def time_left(self) -> timedelta:
         """
         Calculate the delta time between now and the deadline. May return a
         negative number. In this case, the deadline has passed. If no deadline
@@ -134,56 +135,56 @@ class StatusRow(object):
 
         return timestamp - now()
 
-    def has_cook(self):
+    def has_cook(self) -> bool:
         """
         Return True if there is at least one cook
         """
 
         return self._test(lambda x: x.value > 0)
 
-    def has_diners(self):
+    def has_diners(self) -> bool:
         """
         Return true if there is at least one diner (which isn't a cook)
         """
 
         return self._test(lambda x: x.value < 0 and x.value is not None)
 
-    def get_cooks(self):
+    def get_cooks(self) -> list[int]:
         """
         Return a list of indices of all cooks
         """
 
         return self._extract(lambda x: x.value > 0)
 
-    def get_diners(self):
+    def get_diners(self) -> list[int]:
         """
-        Return a list of indices of all diners (which aren't cooks)
+        Return a list of indices of all diners (which are not cooks)
         """
 
         return self._extract(lambda x: x.value < 0 and x.value is not None)
 
-    def get_diners_and_cooks(self):
+    def get_diners_and_cooks(self) -> list[int]:
         """
         Return a list of indices of all diners and cooks.
         """
 
         return self.get_cooks() + self.get_diners()
 
-    def get_nones(self):
+    def get_nones(self) -> list[int]:
         """
         Return a list of indices of ones not attending dinner.
         """
 
         return self._extract(lambda x: x.value == 0)
 
-    def get_unknowns(self):
+    def get_unknowns(self) -> list[int]:
         """
         Return a list of indices of ones who haven't made choice yet
         """
 
         return self._extract(lambda x: x.value is None)
 
-    def get_nones_and_unknowns(self):
+    def get_nones_and_unknowns(self) -> list[int]:
         """
         Return a list of indices of ones not attending dinner and who haven't
         made a choice yet.
@@ -191,7 +192,7 @@ class StatusRow(object):
 
         return self.get_nones() + self.get_unknowns()
 
-    def get_count(self, indices=None):
+    def get_count(self, indices=None) -> int:
         """
         Count the number of people attending dinner. This may include guests.
 
@@ -216,7 +217,7 @@ class StatusRow(object):
 
         return count
 
-    def get_statuses(self, indices=None):
+    def get_statuses(self, indices=None) -> list[int]:
         """
         Return the statuses.
 
@@ -228,7 +229,7 @@ class StatusRow(object):
         else:
             return [self.statuses[index] for index in indices]
 
-    def _extract(self, test_func):
+    def _extract(self, test_func: Callable[[int], bool]) -> list[int]:
         result = []
 
         for index, status in enumerate(self.statuses):
@@ -237,7 +238,7 @@ class StatusRow(object):
 
         return result
 
-    def _test(self, test_func):
+    def _test(self, test_func: Callable[[int], bool]) -> bool:
         for status in self.statuses:
             if test_func(status):
                 return True
@@ -250,18 +251,19 @@ class Eetlijst(object):
     Eetlijst base class.
     """
 
-    __slots__ = ["username", "password", "session", "cache"]
+    __slots__ = ("username", "password", "session", "cache")
 
-    def __init__(self, username=None, password=None, session_id=None,
-                 login=False):
+    def __init__(self, username: str = None, password: str = None,
+                 session_id: str = None, login: bool = False)  -> None:
         """
-        Construct a new Eetlijst object. By default, login is deferred until
+        Construct a new Eetlijst client. By default, login is deferred until
         the first action is executed.
 
         A username and password should be given to construct a session. Setting
-        login=True will directly login and get a session id. Additionally, a
-        session_id can be given a id that is known to be valid. Having
-        login=True in this case will test the session id.
+        `login` to `True` will directly login and get a session id.
+        Additionally, a `session_id` can be set to an identifier that is known
+        to be valid. Having `login` set to `True` in this case will test the
+        session identifier.
 
         One big fat warning: this API is prone to race conditions. For
         instance, reading data, wait a few seconds and writing it back may go
@@ -270,7 +272,7 @@ class Eetlijst(object):
         """
 
         if username is None and password is None and session_id is None:
-            raise LoginError("No username/password or session id provided.")
+            raise LoginError("No username/password or session identifier provided.")
 
         self.username = username
         self.password = password
@@ -278,18 +280,18 @@ class Eetlijst(object):
         self.session = None
         self.cache = {}
 
-        # Store given session id
+        # Store given session identifier.
         if session_id:
             self.session = (session_id, timeout(seconds=TIMEOUT_SESSION))
 
             if login:
                 self._main_page()
         else:
-            # Login if applicable
+            # Login if applicable.
             if login:
                 self._get_session()
 
-    def clear_cache(self):
+    def clear_cache(self) -> None:
         """
         Clear the internal cache and reset session.
         """
@@ -297,27 +299,27 @@ class Eetlijst(object):
         self.session = None
         self.cache = {}
 
-    def get_session_id(self):
+    def get_session_id(self) -> str:
         """
-        Return the current session id. If not session id is not available, then
-        None will be returned.
+        Return the current session identifier. If not session identifier is
+        not available, then `None` will be returned.
         """
 
         return self._get_session(renew=False)
 
-    def get_name(self):
+    def get_name(self) -> str:
         """
         Get the name of the Eetlijst list.
         """
 
         content = self._main_page()
 
-        # Grap the list name
+        # Grap the list name.
         soup = self._get_soup(content)
         return soup.find(["head", "title"]) \
             .text.replace("Eetlijst.nl - ", "", 1).strip()
 
-    def get_residents(self):
+    def get_residents(self) -> list[str]:
         """
         Return all users listed on the Eetlijst list. It does not account for
         users that have been deleted.
@@ -325,12 +327,12 @@ class Eetlijst(object):
 
         content = self._main_page()
 
-        # Find all names
+        # Find all names.
         soup = self._get_soup(content)
         residents = soup.find_all(["th", "a"], title=RE_RESIDENTS)
         return [x.nobr.b.text for x in residents]
 
-    def get_noticeboard(self):
+    def get_noticeboard(self) -> str:
         """
         Return the contents of the noticeboard. It removes any formatting
         and/or links.
@@ -338,26 +340,26 @@ class Eetlijst(object):
 
         content = self._main_page()
 
-        # Grap the notice board
+        # Grap the notice board.
         soup = self._get_soup(content)
         return soup.find(
             "a", title="Klik hier als je het prikbord wilt aanpassen").text
 
-    def set_noticeboard(self, message):
+    def set_noticeboard(self, message: str) -> None:
         """
         Update the contents of the noticeboard.
         """
 
         self._main_page(post=True, data={"messageboard": message})
 
-    def set_status(self, resident_index, value, timestamp):
+    def set_status(self, resident_index, value, timestamp) -> str:
         """
         Set the status for a given resident_index and timestamp in the future.
         The timestamp should point to an extact row in the Eetlijst list.
         """
 
         if timestamp < now():
-            raise ValueError("Timestamp cannot be in the past")
+            raise ValueError("Timestamp cannot be in the past.")
 
         # Pick strategy for advancing to value. Values other than -5, -4 and 4
         # can be set without a problem, but the rest may require multiple
@@ -380,25 +382,25 @@ class Eetlijst(object):
             _request(3)
             _request(4)
         elif value is None:
-            _request(-5)  # None corresponds to -5
+            _request(-5)  # None corresponds to -5.
         else:
             _request(value)
 
         # TODO: add verification. Probably something like:
         # self.get_status(resident_index, timestamp) == value
 
-    def get_status(self, resident_index, timestamp):
+    def get_status(self, resident_index: int, timestamp: datetime) -> int:
         """
         Return the status for a given date in the future. The timestamp should
         point to an extact row in the Eetlijst list.
         """
 
         if timestamp < now():
-            raise ValueError("Timestamp cannot be in the past")
+            raise ValueError("Timestamp cannot be in the past.")
 
-        raise NotImplementedError("Method not yet implemented")
+        raise NotImplementedError("Method not yet implemented.")
 
-    def get_statuses(self, limit=None):
+    def get_statuses(self, limit: Optional[int] = None) -> list[StatusRow]:
         """
         Return the diner status of the residents for one or multiple days,
         starting today. The result is a list of StatusRows, where each row
@@ -412,26 +414,26 @@ class Eetlijst(object):
         start = soup.find(["table", "tbody", "tr", "th"], width="80")
 
         if not start:
-            raise ScrapingError("Cannot parse status table")
+            raise ScrapingError("Cannot parse status table.")
 
         rows = start.parent.parent.find_all("tr")
 
-        # Iterate over each status row
+        # Iterate over each status row.
         has_deadline = False
         pattern = None
         results = []
         start = 0
 
         for row in rows:
-            # Check for limit
+            # Check for limit.
             if limit and len(results) >= limit:
                 break
 
-            # Skip header rows
+            # Skip header rows.
             if len(row.find_all("th")) > 0:
                 continue
 
-            # Check if the list uses deadlines
+            # Check if the list uses deadlines.
             if len(results) == 0:
                 has_deadline = bool(
                     row.find(["td", "a"], href=RE_JAVASCRIPT_VS_1))
@@ -443,13 +445,13 @@ class Eetlijst(object):
                 start = 1
                 pattern = RE_JAVASCRIPT_K
 
-            # Match date and deadline
-            matches = re.search(pattern, row.renderContents())
+            # Match date and deadline.
+            matches = re.search(pattern, row.decode_contents())
             timestamp = datetime.fromtimestamp(
                 int(matches.group(1)), tz=TZ_UTC)
             timestamp_eetlijst = timestamp.astimezone(TZ_EETLIJST)
 
-            # Parse each cell for diner status
+            # Parse each cell for diner status.
             statuses = []
 
             for index, cell in enumerate(row.find_all("td")):
@@ -457,19 +459,19 @@ class Eetlijst(object):
                     continue
 
                 # Count statuses
-                images = cell.renderContents()
+                images = cell.decode_contents()
 
                 nop = images.count("nop.gif")
                 kook = images.count("kook.gif")
                 eet = images.count("eet.gif")
                 leeg = images.count("leeg.gif")
 
-                # Match numbers, in case there are more than 4 images
+                # Match numbers, in case there are more than 4 images.
                 extra = RE_DIGIT.findall(cell.text)
                 extra = int(extra[0]) if extra else 1
 
                 # Parse last changed. This only works for the first row. Note
-                # that Eetlijst.nl is a dutch website and displays time in
+                # that Eetlijst.nl is a Dutch website and displays time in
                 # Europe/Amsterdam. Because time conversion is buggy, we take
                 # the UTC midnight, subtract the difference with
                 # Europe/Amsterdam for that day, and then add the hours and
@@ -480,7 +482,7 @@ class Eetlijst(object):
                     midnight = timestamp.replace(
                         hour=0, minute=0, second=0, microsecond=0) - \
                         timestamp_eetlijst.utcoffset()
-                    matches = re.search(RE_LAST_CHANGED, unicode(cell).lower())
+                    matches = re.search(RE_LAST_CHANGED, cell.decode_contents().lower())
 
                     if matches:
                         hour, minute = matches.groups()
@@ -493,7 +495,7 @@ class Eetlijst(object):
                 else:
                     last_changed = None
 
-                # Set the data
+                # Set the data.
                 if nop > 0:
                     value = 0
                 elif kook > 0 and eet == 0:
@@ -507,10 +509,10 @@ class Eetlijst(object):
                 else:
                     raise ScrapingError("Cannot parse diner status.")
 
-                # Append to results
+                # Append to results.
                 statuses.append(Status(value=value, last_changed=last_changed))
 
-            # Append to results
+            # Append to results.
             results.append(StatusRow(
                 timestamp=timestamp,
                 deadline=timestamp if has_deadline else None,
@@ -518,10 +520,10 @@ class Eetlijst(object):
 
         return results
 
-    def _get_soup(self, content):
+    def _get_soup(self, content: bytes) -> BeautifulSoup:
         return BeautifulSoup(content, "html.parser")
 
-    def _from_cache(self, key):
+    def _from_cache(self, key: str) -> Optional[tuple[bytes, datetime]]:
         try:
             response, valid_until = self.cache[key]
         except KeyError:
@@ -529,16 +531,16 @@ class Eetlijst(object):
 
         return response if now() < valid_until else None
 
-    def _login(self):
-        # Verify username and password
+    def _login(self) -> None:
+        # Verify username and password.
         if self.username is None and self.password is None:
-            raise LoginError("Cannot login without username/password.")
+            raise LoginError("Cannot login without username and password.")
 
         # Create request
         payload = {"login": self.username, "pass": self.password}
         response = requests.get(BASE_URL + "login.php", params=payload)
 
-        # Check for errors
+        # Check for errors.
         if response.status_code != 200:
             raise SessionError(
                 "Unexpected status code: %d" % response.status_code)
@@ -547,7 +549,7 @@ class Eetlijst(object):
             raise LoginError(
                 "Unable to login. Username and/or password incorrect.")
 
-        # Get session parameter
+        # Get session parameter.
         query_string = urlparse.urlparse(response.url).query
         query_array = urlparse.parse_qs(query_string)
 
@@ -556,21 +558,21 @@ class Eetlijst(object):
                 query_array.get("session_id")[0],
                 timeout(seconds=TIMEOUT_SESSION))
         except IndexError:
-            raise ScrapingError("Unable to strip session id from URL")
+            raise ScrapingError("Unable to strip session identifier from URL.")
 
-        # Login redirects to main page, so cache it
+        # Login redirects to main page, so cache it.
         self.cache["main_page"] = (
             response.content, timeout(seconds=TIMEOUT_CACHE))
 
-    def _get_session(self, is_retry=False, renew=True):
-        # Start a session
+    def _get_session(self, is_retry: bool = False, renew: bool = True) -> Optional[str]:
+        # Start a session.
         if self.session is None:
             if not renew:
                 return
 
             self._login()
 
-        # Check if session is still valid
+        # Check if session is still valid.
         session, valid_until = self.session
 
         if valid_until < now():
@@ -585,11 +587,13 @@ class Eetlijst(object):
 
         return session
 
-    def _main_page(self, is_retry=False, data=None, post=False):
+    def _main_page(self, is_retry: bool = False,
+                   data: Optional[dict[str, Union[str, int]]] = None,
+                   post: bool = False) -> BeautifulSoup:
         if data is None:
             data = {}
 
-        # Prepare request
+        # Prepare request.
         if post:
             payload = {
                 "session_id": self._get_session(),
@@ -613,26 +617,26 @@ class Eetlijst(object):
             response = self._from_cache("main_page") or requests.get(
                 BASE_URL + "main.php", params=payload)
 
-        if type(response) != str:
-            # Check for errors
+        if type(response) != str and type(response) != bytes:
+            # Check for errors.
             if response.status_code != 200:
                 raise SessionError(
                     "Unexpected status code: %d" % response.status_code)
 
-            # Session expired
+            # Session expired.
             if "login.php" in response.url:
                 self.clear_cache()
 
-                # Determine to retry or not
+                # Determine to retry or not.
                 if is_retry:
                     raise SessionError("Unable to retrieve page: main.php")
                 else:
                     return self._main_page(is_retry=True, data=data, post=post)
 
-            # Convert to string, we don't need the rest anymore
+            # Convert to string, we do not need the rest anymore.
             response = response.content
 
-        # Update cache and session
+        # Update cache and session.
         self.session = (self.session[0], timeout(seconds=TIMEOUT_SESSION))
         self.cache["main_page"] = (response, timeout(seconds=TIMEOUT_CACHE))
 
