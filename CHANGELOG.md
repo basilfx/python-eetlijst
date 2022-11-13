@@ -26,8 +26,6 @@ Highlights:
 
 The full list of commits can be found [here](https://github.com/basilfx/python-eetlijst/compare/v1.2...v1.3).
 
-This release supersedes v0.2.2a1.
-
 ## v1.2
 Released 28 August 2014
 
