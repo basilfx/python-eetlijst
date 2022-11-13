@@ -16,7 +16,7 @@ __version__ = "2.0.0"
 
 BASE_URL = "https://www.eetlijst.nl/"
 
-RE_DIGIT = re.compile("\d+")
+RE_DIGIT = re.compile(r"\d+")
 RE_JAVASCRIPT_VS_1 = re.compile(r"javascript:vs")
 RE_JAVASCRIPT_VS_2 = re.compile(r"javascript:vs\(([0-9]*)\);")
 RE_JAVASCRIPT_K = re.compile(r"javascript:k\(([0-9]*),([-0-9]*),([-0-9]*)\);")
