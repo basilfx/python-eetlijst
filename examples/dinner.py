@@ -1,11 +1,11 @@
-import eetlijst
 import sys
+
+import eetlijst
 
 
 def main(argv: list[str]) -> int:
     if len(argv) != 4:
-        sys.stdout.write(
-            "Usage: %s <username> <password> <get|set>\n" % argv[0])
+        sys.stdout.write("Usage: %s <username> <password> <get|set>\n" % argv[0])
         return 0
 
     # Parse action.
@@ -17,8 +17,7 @@ def main(argv: list[str]) -> int:
 
     # Create a client.
     try:
-        client = eetlijst.Eetlijst(
-            username=argv[1], password=argv[2], login=True)
+        client = eetlijst.Eetlijst(username=argv[1], password=argv[2], login=True)
     except eetlijst.LoginError:
         sys.stderr.write("Username and/or password incorrect\n")
         return 1
@@ -37,7 +36,8 @@ def set_action(client: eetlijst.Eetlijst) -> None:
     if row.has_deadline_passed():
         sys.stdout.write(
             "The deadline is %s, and has passed. Changing status is not "
-            "possible today.\n" % row.deadline.time())
+            "possible today.\n" % row.deadline.time()
+        )
         return
 
     # Print all residents.
@@ -105,11 +105,13 @@ def get_action(client: eetlijst.Eetlijst) -> None:
     if row.deadline:
         if row.has_deadline_passed():
             sys.stdout.write(
-                "The deadline is %s, and has passed.\n\n" %
-                row.deadline.time())
+                "The deadline is %s, and has passed.\n\n" % row.deadline.time()
+            )
         else:
-            sys.stdout.write("The deadline is %s, so there is %s left.\n\n" % (
-                row.deadline.time(), row.time_left()))
+            sys.stdout.write(
+                "The deadline is %s, so there is %s left.\n\n"
+                % (row.deadline.time(), row.time_left())
+            )
     else:
         sys.stdout.write("There is no deadline.\n\n")
 
@@ -141,12 +143,14 @@ def get_action(client: eetlijst.Eetlijst) -> None:
     # Print it all.
     sys.stdout.write(
         "In total, %d people (including cooks and guests) will attend "
-        "dinner.\n\n" % row.get_count())
+        "dinner.\n\n" % row.get_count()
+    )
 
     sys.stdout.write(" | ".join(names) + "\n")
     sys.stdout.write(" | ".join(values) + "\n\n")
 
     sys.stdout.write("X = No, C = Cook, D = Diner, ? = Unknown\n")
+
 
 # For example: `python dinner.py username password get`.
 if __name__ == "__main__":

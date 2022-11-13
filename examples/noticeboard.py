@@ -1,11 +1,11 @@
-import eetlijst
 import sys
+
+import eetlijst
 
 
 def main(argv: list[str]) -> int:
     if len(argv) != 4:
-        sys.stdout.write(
-            "Usage: %s <username> <password> <get|set>\n" % argv[0])
+        sys.stdout.write("Usage: %s <username> <password> <get|set>\n" % argv[0])
         return 0
 
     # Parse action.
@@ -17,8 +17,7 @@ def main(argv: list[str]) -> int:
 
     # Create a client.
     try:
-        client = eetlijst.Eetlijst(
-            username=argv[1], password=argv[2], login=True)
+        client = eetlijst.Eetlijst(username=argv[1], password=argv[2], login=True)
     except eetlijst.LoginError:
         sys.stderr.write("Username and/or password incorrect.\n")
         return 1
@@ -46,6 +45,7 @@ def set_action(client: eetlijst.Eetlijst) -> None:
 
     client.set_noticeboard(message)
     sys.stdout.write("Notice board updated\n")
+
 
 # For example: `python noticeboard.py get username password`.
 if __name__ == "__main__":

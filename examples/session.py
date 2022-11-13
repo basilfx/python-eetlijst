@@ -1,5 +1,6 @@
-import eetlijst
 import sys
+
+import eetlijst
 
 
 def main(argv: list[str]) -> int:
@@ -19,7 +20,9 @@ def main(argv: list[str]) -> int:
 
     # Perform action.
     sys.stdout.write(
-        "Session identifier belongs to list with name '%s'.\n" % client.get_name())
+        "Session identifier belongs to list with name '%s'.\n" % client.get_name()
+    )
+
 
 # For example: `python session.py session_id`.
 if __name__ == "__main__":

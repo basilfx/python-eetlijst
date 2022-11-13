@@ -3,15 +3,14 @@
 
 # See the LICENSE file for the full GPLv3 license
 
-from typing import Callable, Optional, Union
-from bs4 import BeautifulSoup
-
-from datetime import datetime, timedelta
-
-import requests
-import urllib.parse as urlparse
-import pytz
 import re
+import urllib.parse as urlparse
+from datetime import datetime, timedelta
+from typing import Callable, Optional, Union
+
+import pytz
+import requests
+from bs4 import BeautifulSoup
 
 __version__ = "2.0.0"
 
@@ -49,6 +48,7 @@ class Error(Exception):
     """
     Base Eetlijst error.
     """
+
     pass
 
 
@@ -56,6 +56,7 @@ class LoginError(Error):
     """
     Error class for bad logins.
     """
+
     pass
 
 
@@ -63,6 +64,7 @@ class SessionError(Error):
     """
     Error class for session and/or other errors.
     """
+
     pass
 
 
@@ -70,6 +72,7 @@ class ScrapingError(Error):
     """
     Error class for scraping related errors.
     """
+
     pass
 
 
@@ -93,8 +96,7 @@ class Status(object):
         self.last_changed = last_changed
 
     def __repr__(self) -> str:
-        return "Status(value=%d, last_changed=%s)" % (
-            self.value, self.last_changed)
+        return "Status(value=%d, last_changed=%s)" % (self.value, self.last_changed)
 
 
 class StatusRow(object):
@@ -112,7 +114,10 @@ class StatusRow(object):
 
     def __repr__(self) -> str:
         return "StatusRow(timestamp=%s, deadline=%s, statuses=%s)" % (
-            self.timestamp, self.deadline, self.statuses)
+            self.timestamp,
+            self.deadline,
+            self.statuses,
+        )
 
     def has_deadline_passed(self) -> bool:
         """
@@ -129,8 +134,13 @@ class StatusRow(object):
         """
 
         timestamp = self.deadline or datetime(
-            year=self.timestamp.year, month=self.timestamp.month,
-            day=self.timestamp.day, hour=23, minute=59, second=59)
+            year=self.timestamp.year,
+            month=self.timestamp.month,
+            day=self.timestamp.day,
+            hour=23,
+            minute=59,
+            second=59,
+        )
 
         return timestamp - now()
 
@@ -252,8 +262,13 @@ class Eetlijst(object):
 
     __slots__ = ("username", "password", "session", "cache")
 
-    def __init__(self, username: str = None, password: str = None,
-                 session_id: str = None, login: bool = False)  -> None:
+    def __init__(
+        self,
+        username: str = None,
+        password: str = None,
+        session_id: str = None,
+        login: bool = False,
+    ) -> None:
         """
         Construct a new Eetlijst client. By default, login is deferred until
         the first action is executed.
@@ -315,8 +330,9 @@ class Eetlijst(object):
 
         # Grap the list name.
         soup = self._get_soup(content)
-        return soup.find(["head", "title"]) \
-            .text.replace("Eetlijst.nl - ", "", 1).strip()
+        return (
+            soup.find(["head", "title"]).text.replace("Eetlijst.nl - ", "", 1).strip()
+        )
 
     def get_residents(self) -> list[str]:
         """
@@ -341,8 +357,7 @@ class Eetlijst(object):
 
         # Grap the notice board.
         soup = self._get_soup(content)
-        return soup.find(
-            "a", title="Klik hier als je het prikbord wilt aanpassen").text
+        return soup.find("a", title="Klik hier als je het prikbord wilt aanpassen").text
 
     def set_noticeboard(self, message: str) -> None:
         """
@@ -355,7 +370,8 @@ class Eetlijst(object):
                 "Aanpassen.x": 20,
                 "Aanpassen.y": 20,
                 "messageboard": message,
-            })
+            },
+        )
 
     def set_status(self, resident_index, value, timestamp) -> str:
         """
@@ -373,14 +389,17 @@ class Eetlijst(object):
         # can be set without a problem, but the rest may require multiple
         # steps.
         def _request(what):
-            self._main_page(post=True, data={
-                "day[]": int(timestamp.timestamp()),
-                "submittype": 0,
-                "submitwithform.x": 20,
-                "submitwithform.y": 20,
-                "what": what,
-                "who": resident_index,
-            })
+            self._main_page(
+                post=True,
+                data={
+                    "day[]": int(timestamp.timestamp()),
+                    "submittype": 0,
+                    "submitwithform.x": 20,
+                    "submitwithform.y": 20,
+                    "what": what,
+                    "who": resident_index,
+                },
+            )
 
         if value == -5:
             _request(-3)
@@ -449,8 +468,7 @@ class Eetlijst(object):
 
             # Check if the list uses deadlines.
             if len(results) == 0:
-                has_deadline = bool(
-                    row.find(["td", "a"], href=RE_JAVASCRIPT_VS_1))
+                has_deadline = bool(row.find(["td", "a"], href=RE_JAVASCRIPT_VS_1))
 
             if has_deadline:
                 start = 2
@@ -461,8 +479,7 @@ class Eetlijst(object):
 
             # Match date and deadline.
             matches = re.search(pattern, row.decode_contents())
-            timestamp = datetime.fromtimestamp(
-                int(matches.group(1)), tz=TZ_UTC)
+            timestamp = datetime.fromtimestamp(int(matches.group(1)), tz=TZ_UTC)
             timestamp_eetlijst = timestamp.astimezone(TZ_EETLIJST)
 
             # Parse each cell for diner status.
@@ -493,15 +510,17 @@ class Eetlijst(object):
                 # back to UTC fails (see question at
                 # http://stackoverflow.com/a/5801263/1423623 for more info).
                 if len(results) == 0:
-                    midnight = timestamp.replace(
-                        hour=0, minute=0, second=0, microsecond=0) - \
-                        timestamp_eetlijst.utcoffset()
+                    midnight = (
+                        timestamp.replace(hour=0, minute=0, second=0, microsecond=0)
+                        - timestamp_eetlijst.utcoffset()
+                    )
                     matches = re.search(RE_LAST_CHANGED, cell.decode_contents().lower())
 
                     if matches:
                         hour, minute = matches.groups()
                         last_changed = midnight + timedelta(
-                            seconds=int(hour) * 3600 + int(minute) * 60)
+                            seconds=int(hour) * 3600 + int(minute) * 60
+                        )
                     else:
                         last_changed = midnight
 
@@ -527,10 +546,13 @@ class Eetlijst(object):
                 statuses.append(Status(value=value, last_changed=last_changed))
 
             # Append to results.
-            results.append(StatusRow(
-                timestamp=timestamp,
-                deadline=timestamp if has_deadline else None,
-                statuses=statuses))
+            results.append(
+                StatusRow(
+                    timestamp=timestamp,
+                    deadline=timestamp if has_deadline else None,
+                    statuses=statuses,
+                )
+            )
 
         return results
 
@@ -556,12 +578,10 @@ class Eetlijst(object):
 
         # Check for errors.
         if response.status_code != 200:
-            raise SessionError(
-                "Unexpected status code: %d" % response.status_code)
+            raise SessionError("Unexpected status code: %d" % response.status_code)
 
         if "r=failed" in response.url:
-            raise LoginError(
-                "Unable to login. Username and/or password incorrect.")
+            raise LoginError("Unable to login. Username and/or password incorrect.")
 
         # Get session parameter.
         query_string = urlparse.urlparse(response.url).query
@@ -570,13 +590,13 @@ class Eetlijst(object):
         try:
             self.session = (
                 query_array.get("session_id")[0],
-                timeout(seconds=TIMEOUT_SESSION))
+                timeout(seconds=TIMEOUT_SESSION),
+            )
         except IndexError:
             raise ScrapingError("Unable to strip session identifier from URL.")
 
         # Login redirects to main page, so cache it.
-        self.cache["main_page"] = (
-            response.content, timeout(seconds=TIMEOUT_CACHE))
+        self.cache["main_page"] = (response.content, timeout(seconds=TIMEOUT_CACHE))
 
     def _get_session(self, is_retry: bool = False, renew: bool = True) -> Optional[str]:
         # Start a session.
@@ -601,9 +621,12 @@ class Eetlijst(object):
 
         return session
 
-    def _main_page(self, is_retry: bool = False,
-                   data: Optional[dict[str, Union[str, int]]] = None,
-                   post: bool = False) -> BeautifulSoup:
+    def _main_page(
+        self,
+        is_retry: bool = False,
+        data: Optional[dict[str, Union[str, int]]] = None,
+        post: bool = False,
+    ) -> BeautifulSoup:
         if data is None:
             data = {}
 
@@ -627,13 +650,13 @@ class Eetlijst(object):
             payload.update(data)
 
             response = self._from_cache("main_page") or requests.get(
-                BASE_URL + "main.php", params=payload)
+                BASE_URL + "main.php", params=payload
+            )
 
         if type(response) != str and type(response) != bytes:
             # Check for errors.
             if response.status_code != 200:
-                raise SessionError(
-                    "Unexpected status code: %d" % response.status_code)
+                raise SessionError("Unexpected status code: %d" % response.status_code)
 
             # Session expired.
             if "login.php" in response.url:
