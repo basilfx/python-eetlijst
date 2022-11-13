@@ -61,7 +61,7 @@ class EetlijstTest(unittest.TestCase):
         """
 
         self.test_get_response = [
-            MockResponse.from_file("test_main.html", url="http://www.eetlijst.nl/main.php?session_id=bc731753a2d0fecccf12518759108b5b")
+            MockResponse.from_file("test_main.html", url="https://www.eetlijst.nl/main.php?session_id=bc731753a2d0fecccf12518759108b5b")
         ]
 
         try:
@@ -88,8 +88,8 @@ class EetlijstTest(unittest.TestCase):
         """
 
         self.test_get_response = [
-            MockResponse.from_file("test_main.html", url="http://www.eetlijst.nl/main.php?session_id=bc731753a2d0fecccf12518759108b5b"),
-            MockResponse.from_file("test_login_failed.html", url="http://www.eetlijst.nl/login.php?r=failed")
+            MockResponse.from_file("test_main.html", url="https://www.eetlijst.nl/main.php?session_id=bc731753a2d0fecccf12518759108b5b"),
+            MockResponse.from_file("test_login_failed.html", url="https://www.eetlijst.nl/login.php?r=failed")
         ]
 
         eetlijst.Eetlijst(username="test", password="test", session_id="99ee78cf04dbea386a90b57743411b3d", login=True)
@@ -103,7 +103,7 @@ class EetlijstTest(unittest.TestCase):
         """
 
         self.test_get_response = [
-            MockResponse.from_file("test_login_failed.html", url="http://www.eetlijst.nl/login.php?r=failed")
+            MockResponse.from_file("test_login_failed.html", url="https://www.eetlijst.nl/login.php?r=failed")
         ]
 
         client = eetlijst.Eetlijst(session_id="bc731753a2d0fecccf12518759108b5b")
@@ -128,7 +128,7 @@ class EetlijstTest(unittest.TestCase):
         """
 
         self.test_get_response = [
-            MockResponse.from_file("test_login_failed.html", url="http://www.eetlijst.nl/login.php?r=failed")
+            MockResponse.from_file("test_login_failed.html", url="https://www.eetlijst.nl/login.php?r=failed")
         ]
 
         with self.assertRaises(eetlijst.LoginError):
@@ -140,8 +140,8 @@ class EetlijstTest(unittest.TestCase):
         """
 
         self.test_get_response = [
-            MockResponse.from_file("test_main.html", url="http://www.eetlijst.nl/main.php?session_id=bc731753a2d0fecccf12518759108b5b"),
-            MockResponse.from_file("test_main.html", url="http://www.eetlijst.nl/main.php?session_id=99ee78cf04dbea386a90b57743411b3d")
+            MockResponse.from_file("test_main.html", url="https://www.eetlijst.nl/main.php?session_id=bc731753a2d0fecccf12518759108b5b"),
+            MockResponse.from_file("test_main.html", url="https://www.eetlijst.nl/main.php?session_id=99ee78cf04dbea386a90b57743411b3d")
         ]
 
         client = eetlijst.Eetlijst(username="test", password="test", login=True)
@@ -165,8 +165,8 @@ class EetlijstTest(unittest.TestCase):
         """
 
         self.test_get_response = [
-            MockResponse.from_file("test_main.html", url="http://www.eetlijst.nl/main.php?session_id=bc731753a2d0fecccf12518759108b5b"),
-            MockResponse.from_file("test_main.html", url="http://www.eetlijst.nl/main.php?session_id=99ee78cf04dbea386a90b57743411b3d")
+            MockResponse.from_file("test_main.html", url="https://www.eetlijst.nl/main.php?session_id=bc731753a2d0fecccf12518759108b5b"),
+            MockResponse.from_file("test_main.html", url="https://www.eetlijst.nl/main.php?session_id=99ee78cf04dbea386a90b57743411b3d")
         ]
 
         eetlijst.TIMEOUT_SESSION = 2
@@ -194,7 +194,7 @@ class EetlijstTest(unittest.TestCase):
         """
 
         self.test_get_response = [
-            MockResponse.from_file("test_main.html", url="http://www.eetlijst.nl/main.php?session_id=bc731753a2d0fecccf12518759108b5b"),
+            MockResponse.from_file("test_main.html", url="https://www.eetlijst.nl/main.php?session_id=bc731753a2d0fecccf12518759108b5b"),
         ]
 
         eetlijst.TIMEOUT_SESSION = 2
@@ -228,8 +228,8 @@ class EetlijstTest(unittest.TestCase):
         """
 
         self.test_get_response = [
-            MockResponse.from_file("test_main.html", url="http://www.eetlijst.nl/main.php?session_id=bc731753a2d0fecccf12518759108b5b"),
-            MockResponse.from_file("test_main.html", url="http://www.eetlijst.nl/main.php?session_id=99ee78cf04dbea386a90b57743411b3d")
+            MockResponse.from_file("test_main.html", url="https://www.eetlijst.nl/main.php?session_id=bc731753a2d0fecccf12518759108b5b"),
+            MockResponse.from_file("test_main.html", url="https://www.eetlijst.nl/main.php?session_id=99ee78cf04dbea386a90b57743411b3d")
         ]
 
         eetlijst.TIMEOUT_SESSION = 10
@@ -258,7 +258,7 @@ class EetlijstTest(unittest.TestCase):
         """
 
         self.test_get_response = [
-            MockResponse.from_file("test_main.html", url="http://www.eetlijst.nl/main.php?session_id=bc731753a2d0fecccf12518759108b5b")
+            MockResponse.from_file("test_main.html", url="https://www.eetlijst.nl/main.php?session_id=bc731753a2d0fecccf12518759108b5b")
         ]
 
         client = eetlijst.Eetlijst(username="test", password="test")
@@ -272,7 +272,7 @@ class EetlijstTest(unittest.TestCase):
         """
 
         self.test_get_response = [
-            MockResponse.from_file("test_main.html", url="http://www.eetlijst.nl/main.php?session_id=bc731753a2d0fecccf12518759108b5b")
+            MockResponse.from_file("test_main.html", url="https://www.eetlijst.nl/main.php?session_id=bc731753a2d0fecccf12518759108b5b")
         ]
 
         client = eetlijst.Eetlijst(username="test", password="test")
@@ -286,7 +286,7 @@ class EetlijstTest(unittest.TestCase):
         """
 
         self.test_get_response = [
-            MockResponse.from_file("test_main2.html", url="http://www.eetlijst.nl/main.php?session_id=bc731753a2d0fecccf12518759108b5b")
+            MockResponse.from_file("test_main2.html", url="https://www.eetlijst.nl/main.php?session_id=bc731753a2d0fecccf12518759108b5b")
         ]
 
         client = eetlijst.Eetlijst(username="test", password="test")
@@ -301,7 +301,7 @@ class EetlijstTest(unittest.TestCase):
         """
 
         self.test_get_response = [
-            MockResponse.from_file("test_main.html", url="http://www.eetlijst.nl/main.php?session_id=bc731753a2d0fecccf12518759108b5b")
+            MockResponse.from_file("test_main.html", url="https://www.eetlijst.nl/main.php?session_id=bc731753a2d0fecccf12518759108b5b")
         ]
 
         client = eetlijst.Eetlijst(username="test", password="test")
@@ -316,7 +316,7 @@ class EetlijstTest(unittest.TestCase):
         """
 
         self.test_get_response = [
-            MockResponse.from_file("test_main.html", url="http://www.eetlijst.nl/main.php?session_id=bc731753a2d0fecccf12518759108b5b")
+            MockResponse.from_file("test_main.html", url="https://www.eetlijst.nl/main.php?session_id=bc731753a2d0fecccf12518759108b5b")
         ]
 
         client = eetlijst.Eetlijst(username="test", password="test")
@@ -356,7 +356,7 @@ class EetlijstTest(unittest.TestCase):
         """
 
         self.test_get_response = [
-            MockResponse.from_file("test_main4.html", url="http://www.eetlijst.nl/main.php?session_id=bc731753a2d0fecccf12518759108b5b")
+            MockResponse.from_file("test_main4.html", url="https://www.eetlijst.nl/main.php?session_id=bc731753a2d0fecccf12518759108b5b")
         ]
 
         client = eetlijst.Eetlijst(username="test", password="test")
@@ -376,7 +376,7 @@ class EetlijstTest(unittest.TestCase):
         """
 
         self.test_get_response = [
-            MockResponse.from_file("test_main4.html", url="http://www.eetlijst.nl/main.php?session_id=bc731753a2d0fecccf12518759108b5b")
+            MockResponse.from_file("test_main4.html", url="https://www.eetlijst.nl/main.php?session_id=bc731753a2d0fecccf12518759108b5b")
         ]
 
         client = eetlijst.Eetlijst(username="test", password="test")
@@ -401,7 +401,7 @@ class EetlijstTest(unittest.TestCase):
         """
 
         self.test_get_response = [
-            MockResponse.from_file("test_main3.html", url="http://www.eetlijst.nl/main.php?session_id=bc731753a2d0fecccf12518759108b5b")
+            MockResponse.from_file("test_main3.html", url="https://www.eetlijst.nl/main.php?session_id=bc731753a2d0fecccf12518759108b5b")
         ]
 
         client = eetlijst.Eetlijst(username="test", password="test")

@@ -16,7 +16,7 @@ import re
 
 __version__ = "2.0.0"
 
-BASE_URL = "http://www.eetlijst.nl/"
+BASE_URL = "https://www.eetlijst.nl/"
 
 RE_DIGIT = re.compile("\d+")
 RE_JAVASCRIPT_VS_1 = re.compile(r"javascript:vs")
