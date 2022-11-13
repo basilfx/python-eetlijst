@@ -11,7 +11,6 @@ from datetime import datetime, timedelta
 import requests
 import urllib.parse as urlparse
 import pytz
-import time
 import re
 
 __version__ = "2.0.0"
@@ -350,13 +349,22 @@ class Eetlijst(object):
         Update the contents of the noticeboard.
         """
 
-        self._main_page(post=True, data={"messageboard": message})
+        self._main_page(
+            post=True,
+            data={
+                "Aanpassen.x": 20,
+                "Aanpassen.y": 20,
+                "messageboard": message,
+            })
 
     def set_status(self, resident_index, value, timestamp) -> str:
         """
         Set the status for a given resident_index and timestamp in the future.
         The timestamp should point to an extact row in the Eetlijst list.
         """
+
+        if timestamp.tzinfo is None:
+            raise ValueError("Timestamp is time zone unaware.")
 
         if timestamp < now():
             raise ValueError("Timestamp cannot be in the past.")
@@ -366,9 +374,12 @@ class Eetlijst(object):
         # steps.
         def _request(what):
             self._main_page(post=True, data={
+                "day[]": int(timestamp.timestamp()),
                 "submittype": 0,
-                "who": resident_index, "what": what,
-                "day[]": time.mktime(timestamp.utctimetuple())
+                "submitwithform.x": 20,
+                "submitwithform.y": 20,
+                "what": what,
+                "who": resident_index,
             })
 
         if value == -5:
@@ -394,6 +405,9 @@ class Eetlijst(object):
         Return the status for a given date in the future. The timestamp should
         point to an extact row in the Eetlijst list.
         """
+
+        if timestamp.tzinfo is None:
+            raise ValueError("Timestamp is time zone unaware.")
 
         if timestamp < now():
             raise ValueError("Timestamp cannot be in the past.")
@@ -596,16 +610,14 @@ class Eetlijst(object):
         # Prepare request.
         if post:
             payload = {
-                "session_id": self._get_session(),
+                "day[]": "",
                 "messageboard": "",
-                "veranderdag": "",
                 "nieuwetijd": "",
+                "session_id": self._get_session(),
                 "submittype": 2,
-                "who": -1,
+                "veranderdag": "",
                 "what": -1,
-                "day": [],
-                "submitwithform.x": 20,
-                "submitwithform.y": 20
+                "who": -1,
             }
             payload.update(data)
 
