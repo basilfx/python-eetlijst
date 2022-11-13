@@ -2,6 +2,10 @@
 Unofficial Python API for interfacing with Eetlijst.nl, a Dutch website used by
 students to manage dinner status and expenses.
 
+[![Linting](https://github.com/basilfx/python-eetlijst/actions/workflows/lint.yml/badge.svg)](https://github.com/basilfx/python-eetlijst/actions/workflows/lint.yml)
+[![Testing](https://github.com/basilfx/python-eetlijst/actions/workflows/test.yml/badge.svg)](https://github.com/basilfx/python-eetlijst/actions/workflows/test.yml)
+[![PyPI version](https://badge.fury.io/py/python-eetlijst.svg)](https://badge.fury.io/py/python-eetlijst)
+
 Current features include:
 
 * List all residents
