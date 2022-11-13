@@ -1,7 +1,7 @@
 # Changelog
 
 ## v2.0.0
-Unreleased
+Released 13 November 2022
 
 Highlights:
 * Fixed: Python 3 compatibility.
