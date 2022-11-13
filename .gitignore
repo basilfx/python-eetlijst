@@ -1,7 +1,2 @@
-*.egg-info
-*.pyc
-*.pyo
-build/
 dist/
 env/
-MANIFEST
