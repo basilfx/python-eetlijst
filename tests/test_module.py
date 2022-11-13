@@ -1,9 +1,10 @@
-from datetime import datetime
-
 import os
 import time
-import requests
 import unittest
+from datetime import datetime
+
+import requests
+
 import eetlijst
 
 
@@ -61,7 +62,10 @@ class EetlijstTest(unittest.TestCase):
         """
 
         self.test_get_response = [
-            MockResponse.from_file("test_main.html", url="http://www.eetlijst.nl/main.php?session_id=bc731753a2d0fecccf12518759108b5b")
+            MockResponse.from_file(
+                "test_main.html",
+                url="https://www.eetlijst.nl/main.php?session_id=bc731753a2d0fecccf12518759108b5b",
+            )
         ]
 
         try:
@@ -88,11 +92,22 @@ class EetlijstTest(unittest.TestCase):
         """
 
         self.test_get_response = [
-            MockResponse.from_file("test_main.html", url="http://www.eetlijst.nl/main.php?session_id=bc731753a2d0fecccf12518759108b5b"),
-            MockResponse.from_file("test_login_failed.html", url="http://www.eetlijst.nl/login.php?r=failed")
+            MockResponse.from_file(
+                "test_main.html",
+                url="https://www.eetlijst.nl/main.php?session_id=bc731753a2d0fecccf12518759108b5b",
+            ),
+            MockResponse.from_file(
+                "test_login_failed.html",
+                url="https://www.eetlijst.nl/login.php?r=failed",
+            ),
         ]
 
-        eetlijst.Eetlijst(username="test", password="test", session_id="99ee78cf04dbea386a90b57743411b3d", login=True)
+        eetlijst.Eetlijst(
+            username="test",
+            password="test",
+            session_id="99ee78cf04dbea386a90b57743411b3d",
+            login=True,
+        )
 
         self.assertEqual(self.counter, 2)
 
@@ -103,7 +118,10 @@ class EetlijstTest(unittest.TestCase):
         """
 
         self.test_get_response = [
-            MockResponse.from_file("test_login_failed.html", url="http://www.eetlijst.nl/login.php?r=failed")
+            MockResponse.from_file(
+                "test_login_failed.html",
+                url="https://www.eetlijst.nl/login.php?r=failed",
+            )
         ]
 
         client = eetlijst.Eetlijst(session_id="bc731753a2d0fecccf12518759108b5b")
@@ -128,7 +146,10 @@ class EetlijstTest(unittest.TestCase):
         """
 
         self.test_get_response = [
-            MockResponse.from_file("test_login_failed.html", url="http://www.eetlijst.nl/login.php?r=failed")
+            MockResponse.from_file(
+                "test_login_failed.html",
+                url="https://www.eetlijst.nl/login.php?r=failed",
+            )
         ]
 
         with self.assertRaises(eetlijst.LoginError):
@@ -140,8 +161,14 @@ class EetlijstTest(unittest.TestCase):
         """
 
         self.test_get_response = [
-            MockResponse.from_file("test_main.html", url="http://www.eetlijst.nl/main.php?session_id=bc731753a2d0fecccf12518759108b5b"),
-            MockResponse.from_file("test_main.html", url="http://www.eetlijst.nl/main.php?session_id=99ee78cf04dbea386a90b57743411b3d")
+            MockResponse.from_file(
+                "test_main.html",
+                url="https://www.eetlijst.nl/main.php?session_id=bc731753a2d0fecccf12518759108b5b",
+            ),
+            MockResponse.from_file(
+                "test_main.html",
+                url="https://www.eetlijst.nl/main.php?session_id=99ee78cf04dbea386a90b57743411b3d",
+            ),
         ]
 
         client = eetlijst.Eetlijst(username="test", password="test", login=True)
@@ -165,8 +192,14 @@ class EetlijstTest(unittest.TestCase):
         """
 
         self.test_get_response = [
-            MockResponse.from_file("test_main.html", url="http://www.eetlijst.nl/main.php?session_id=bc731753a2d0fecccf12518759108b5b"),
-            MockResponse.from_file("test_main.html", url="http://www.eetlijst.nl/main.php?session_id=99ee78cf04dbea386a90b57743411b3d")
+            MockResponse.from_file(
+                "test_main.html",
+                url="https://www.eetlijst.nl/main.php?session_id=bc731753a2d0fecccf12518759108b5b",
+            ),
+            MockResponse.from_file(
+                "test_main.html",
+                url="https://www.eetlijst.nl/main.php?session_id=99ee78cf04dbea386a90b57743411b3d",
+            ),
         ]
 
         eetlijst.TIMEOUT_SESSION = 2
@@ -194,7 +227,10 @@ class EetlijstTest(unittest.TestCase):
         """
 
         self.test_get_response = [
-            MockResponse.from_file("test_main.html", url="http://www.eetlijst.nl/main.php?session_id=bc731753a2d0fecccf12518759108b5b"),
+            MockResponse.from_file(
+                "test_main.html",
+                url="https://www.eetlijst.nl/main.php?session_id=bc731753a2d0fecccf12518759108b5b",
+            ),
         ]
 
         eetlijst.TIMEOUT_SESSION = 2
@@ -228,8 +264,14 @@ class EetlijstTest(unittest.TestCase):
         """
 
         self.test_get_response = [
-            MockResponse.from_file("test_main.html", url="http://www.eetlijst.nl/main.php?session_id=bc731753a2d0fecccf12518759108b5b"),
-            MockResponse.from_file("test_main.html", url="http://www.eetlijst.nl/main.php?session_id=99ee78cf04dbea386a90b57743411b3d")
+            MockResponse.from_file(
+                "test_main.html",
+                url="https://www.eetlijst.nl/main.php?session_id=bc731753a2d0fecccf12518759108b5b",
+            ),
+            MockResponse.from_file(
+                "test_main.html",
+                url="https://www.eetlijst.nl/main.php?session_id=99ee78cf04dbea386a90b57743411b3d",
+            ),
         ]
 
         eetlijst.TIMEOUT_SESSION = 10
@@ -258,12 +300,15 @@ class EetlijstTest(unittest.TestCase):
         """
 
         self.test_get_response = [
-            MockResponse.from_file("test_main.html", url="http://www.eetlijst.nl/main.php?session_id=bc731753a2d0fecccf12518759108b5b")
+            MockResponse.from_file(
+                "test_main.html",
+                url="https://www.eetlijst.nl/main.php?session_id=bc731753a2d0fecccf12518759108b5b",
+            )
         ]
 
         client = eetlijst.Eetlijst(username="test", password="test")
 
-        self.assertEqual(client.get_name(), u"Python-eetlijst")
+        self.assertEqual(client.get_name(), "Python-eetlijst")
         self.assertEqual(self.counter, 1)
 
     def test_noticeboard(self):
@@ -272,12 +317,15 @@ class EetlijstTest(unittest.TestCase):
         """
 
         self.test_get_response = [
-            MockResponse.from_file("test_main.html", url="http://www.eetlijst.nl/main.php?session_id=bc731753a2d0fecccf12518759108b5b")
+            MockResponse.from_file(
+                "test_main.html",
+                url="https://www.eetlijst.nl/main.php?session_id=bc731753a2d0fecccf12518759108b5b",
+            )
         ]
 
         client = eetlijst.Eetlijst(username="test", password="test")
 
-        self.assertEqual(client.get_noticeboard(), u"This is a test message!")
+        self.assertEqual(client.get_noticeboard(), "This is a test message!")
         self.assertEqual(self.counter, 1)
 
     def test_noticeboard_html(self):
@@ -286,14 +334,19 @@ class EetlijstTest(unittest.TestCase):
         """
 
         self.test_get_response = [
-            MockResponse.from_file("test_main2.html", url="http://www.eetlijst.nl/main.php?session_id=bc731753a2d0fecccf12518759108b5b")
+            MockResponse.from_file(
+                "test_main2.html",
+                url="https://www.eetlijst.nl/main.php?session_id=bc731753a2d0fecccf12518759108b5b",
+            )
         ]
 
         client = eetlijst.Eetlijst(username="test", password="test")
 
-        self.assertEqual(client.get_noticeboard(), u"This is a test message!\n\n\nwww.github.com/basilfx")
+        self.assertEqual(
+            client.get_noticeboard(),
+            "This is a test message!\n\n\nwww.github.com/basilfx",
+        )
         self.assertEqual(self.counter, 1)
-
 
     def test_residents(self):
         """
@@ -301,13 +354,18 @@ class EetlijstTest(unittest.TestCase):
         """
 
         self.test_get_response = [
-            MockResponse.from_file("test_main.html", url="http://www.eetlijst.nl/main.php?session_id=bc731753a2d0fecccf12518759108b5b")
+            MockResponse.from_file(
+                "test_main.html",
+                url="https://www.eetlijst.nl/main.php?session_id=bc731753a2d0fecccf12518759108b5b",
+            )
         ]
 
         client = eetlijst.Eetlijst(username="test", password="test")
         residents = client.get_residents()
 
-        self.assertListEqual(residents, [u"Unknown1", u"Unknown2", u"Unknown3", u"Unknown4", u"Unknown5"])
+        self.assertListEqual(
+            residents, ["Unknown1", "Unknown2", "Unknown3", "Unknown4", "Unknown5"]
+        )
         self.assertEqual(self.counter, 1)
 
     def test_statuses(self):
@@ -316,16 +374,34 @@ class EetlijstTest(unittest.TestCase):
         """
 
         self.test_get_response = [
-            MockResponse.from_file("test_main.html", url="http://www.eetlijst.nl/main.php?session_id=bc731753a2d0fecccf12518759108b5b")
+            MockResponse.from_file(
+                "test_main.html",
+                url="https://www.eetlijst.nl/main.php?session_id=bc731753a2d0fecccf12518759108b5b",
+            )
         ]
 
         client = eetlijst.Eetlijst(username="test", password="test")
         rows = client.get_statuses(limit=2)
 
-        self.assertListEqual([status.value for status in rows[0].statuses], [-1, -1, -1, -1, -1])
-        self.assertListEqual([status.value for status in rows[1].statuses], [1, -3, 0, 0, 0])
+        self.assertListEqual(
+            [status.value for status in rows[0].statuses], [-1, -1, -1, -1, -1]
+        )
+        self.assertListEqual(
+            [status.value for status in rows[1].statuses], [1, -3, 0, 0, 0]
+        )
 
-        self.assertEqual(rows[0].timestamp, datetime(year=2014, month=3, day=28, hour=23, minute=0, second=0, tzinfo=eetlijst.TZ_UTC))
+        self.assertEqual(
+            rows[0].timestamp,
+            datetime(
+                year=2014,
+                month=3,
+                day=28,
+                hour=23,
+                minute=0,
+                second=0,
+                tzinfo=eetlijst.TZ_UTC,
+            ),
+        )
         self.assertEqual(rows[0].deadline, None)
         self.assertEqual(rows[0].has_deadline_passed(), False)
 
@@ -356,17 +432,75 @@ class EetlijstTest(unittest.TestCase):
         """
 
         self.test_get_response = [
-            MockResponse.from_file("test_main4.html", url="http://www.eetlijst.nl/main.php?session_id=bc731753a2d0fecccf12518759108b5b")
+            MockResponse.from_file(
+                "test_main4.html",
+                url="https://www.eetlijst.nl/main.php?session_id=bc731753a2d0fecccf12518759108b5b",
+            )
         ]
 
         client = eetlijst.Eetlijst(username="test", password="test")
         rows = client.get_statuses(limit=1)
 
-        self.assertEqual(rows[0].statuses[0].last_changed, datetime(year=2014, month=8, day=27, hour=22, minute=0, second=0, tzinfo=eetlijst.TZ_UTC))
-        self.assertEqual(rows[0].statuses[1].last_changed, datetime(year=2014, month=8, day=27, hour=22, minute=30, second=0, tzinfo=eetlijst.TZ_UTC))
-        self.assertEqual(rows[0].statuses[2].last_changed, datetime(year=2014, month=8, day=27, hour=22, minute=0, second=0, tzinfo=eetlijst.TZ_UTC))
-        self.assertEqual(rows[0].statuses[3].last_changed, datetime(year=2014, month=8, day=28, hour=10, minute=30, second=0, tzinfo=eetlijst.TZ_UTC))
-        self.assertEqual(rows[0].statuses[4].last_changed, datetime(year=2014, month=8, day=28, hour=12, minute=30, second=0, tzinfo=eetlijst.TZ_UTC))
+        self.assertEqual(
+            rows[0].statuses[0].last_changed,
+            datetime(
+                year=2014,
+                month=8,
+                day=27,
+                hour=22,
+                minute=0,
+                second=0,
+                tzinfo=eetlijst.TZ_UTC,
+            ),
+        )
+        self.assertEqual(
+            rows[0].statuses[1].last_changed,
+            datetime(
+                year=2014,
+                month=8,
+                day=27,
+                hour=22,
+                minute=30,
+                second=0,
+                tzinfo=eetlijst.TZ_UTC,
+            ),
+        )
+        self.assertEqual(
+            rows[0].statuses[2].last_changed,
+            datetime(
+                year=2014,
+                month=8,
+                day=27,
+                hour=22,
+                minute=0,
+                second=0,
+                tzinfo=eetlijst.TZ_UTC,
+            ),
+        )
+        self.assertEqual(
+            rows[0].statuses[3].last_changed,
+            datetime(
+                year=2014,
+                month=8,
+                day=28,
+                hour=10,
+                minute=30,
+                second=0,
+                tzinfo=eetlijst.TZ_UTC,
+            ),
+        )
+        self.assertEqual(
+            rows[0].statuses[4].last_changed,
+            datetime(
+                year=2014,
+                month=8,
+                day=28,
+                hour=12,
+                minute=30,
+                second=0,
+                tzinfo=eetlijst.TZ_UTC,
+            ),
+        )
 
         self.assertEqual(self.counter, 1)
 
@@ -376,14 +510,22 @@ class EetlijstTest(unittest.TestCase):
         """
 
         self.test_get_response = [
-            MockResponse.from_file("test_main4.html", url="http://www.eetlijst.nl/main.php?session_id=bc731753a2d0fecccf12518759108b5b")
+            MockResponse.from_file(
+                "test_main4.html",
+                url="https://www.eetlijst.nl/main.php?session_id=bc731753a2d0fecccf12518759108b5b",
+            )
         ]
 
         client = eetlijst.Eetlijst(username="test", password="test")
         rows = client.get_statuses(limit=2)
 
-        self.assertListEqual([status.value for status in rows[0].statuses], [-5, 11, -1, 1, 0])
-        self.assertListEqual([status.value for status in rows[1].statuses], [None, None, None, None, None])
+        self.assertListEqual(
+            [status.value for status in rows[0].statuses], [-5, 11, -1, 1, 0]
+        )
+        self.assertListEqual(
+            [status.value for status in rows[1].statuses],
+            [None, None, None, None, None],
+        )
 
         self.assertListEqual(rows[0].get_cooks(), [1, 3])
         self.assertListEqual(rows[0].get_nones(), [4])
@@ -401,14 +543,39 @@ class EetlijstTest(unittest.TestCase):
         """
 
         self.test_get_response = [
-            MockResponse.from_file("test_main3.html", url="http://www.eetlijst.nl/main.php?session_id=bc731753a2d0fecccf12518759108b5b")
+            MockResponse.from_file(
+                "test_main3.html",
+                url="https://www.eetlijst.nl/main.php?session_id=bc731753a2d0fecccf12518759108b5b",
+            )
         ]
 
         client = eetlijst.Eetlijst(username="test", password="test")
         rows = client.get_statuses(limit=1)
 
-        self.assertEqual(rows[0].timestamp, datetime(year=2014, month=3, day=29, hour=23, minute=0, second=0, tzinfo=eetlijst.TZ_UTC))
-        self.assertEqual(rows[0].deadline, datetime(year=2014, month=3, day=29, hour=23, minute=0, second=0, tzinfo=eetlijst.TZ_UTC))
+        self.assertEqual(
+            rows[0].timestamp,
+            datetime(
+                year=2014,
+                month=3,
+                day=29,
+                hour=23,
+                minute=0,
+                second=0,
+                tzinfo=eetlijst.TZ_UTC,
+            ),
+        )
+        self.assertEqual(
+            rows[0].deadline,
+            datetime(
+                year=2014,
+                month=3,
+                day=29,
+                hour=23,
+                minute=0,
+                second=0,
+                tzinfo=eetlijst.TZ_UTC,
+            ),
+        )
         self.assertEqual(rows[0].has_deadline_passed(), True)
 
         self.assertEqual(self.counter, 1)

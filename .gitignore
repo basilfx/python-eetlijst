@@ -1,7 +1,5 @@
-*.egg-info
-*.pyc
-*.pyo
-build/
+__pycache__/
+.pytest_cache/
+.vscode/
 dist/
 env/
-MANIFEST
