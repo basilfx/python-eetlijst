@@ -38,6 +38,8 @@ jobs:
 
       - run: poetry install --no-interaction
 
+      - run: poetry run flake8 eetlijst examples tests
+
       - run: poetry run black --check --diff eetlijst examples tests
 
       - run: poetry run isort --check --diff eetlijst examples tests

@@ -64,7 +64,7 @@ class EetlijstTest(unittest.TestCase):
         self.test_get_response = [
             MockResponse.from_file(
                 "test_main.html",
-                url="https://www.eetlijst.nl/main.php?session_id=bc731753a2d0fecccf12518759108b5b",
+                url="https://www.eetlijst.nl/main.php?session_id=bc731753a2d0fecccf12518759108b5b",  # noqa
             )
         ]
 
@@ -94,7 +94,7 @@ class EetlijstTest(unittest.TestCase):
         self.test_get_response = [
             MockResponse.from_file(
                 "test_main.html",
-                url="https://www.eetlijst.nl/main.php?session_id=bc731753a2d0fecccf12518759108b5b",
+                url="https://www.eetlijst.nl/main.php?session_id=bc731753a2d0fecccf12518759108b5b",  # noqa
             ),
             MockResponse.from_file(
                 "test_login_failed.html",
@@ -163,11 +163,11 @@ class EetlijstTest(unittest.TestCase):
         self.test_get_response = [
             MockResponse.from_file(
                 "test_main.html",
-                url="https://www.eetlijst.nl/main.php?session_id=bc731753a2d0fecccf12518759108b5b",
+                url="https://www.eetlijst.nl/main.php?session_id=bc731753a2d0fecccf12518759108b5b",  # noqa
             ),
             MockResponse.from_file(
                 "test_main.html",
-                url="https://www.eetlijst.nl/main.php?session_id=99ee78cf04dbea386a90b57743411b3d",
+                url="https://www.eetlijst.nl/main.php?session_id=99ee78cf04dbea386a90b57743411b3d",  # noqa
             ),
         ]
 
@@ -194,11 +194,11 @@ class EetlijstTest(unittest.TestCase):
         self.test_get_response = [
             MockResponse.from_file(
                 "test_main.html",
-                url="https://www.eetlijst.nl/main.php?session_id=bc731753a2d0fecccf12518759108b5b",
+                url="https://www.eetlijst.nl/main.php?session_id=bc731753a2d0fecccf12518759108b5b",  # noqa
             ),
             MockResponse.from_file(
                 "test_main.html",
-                url="https://www.eetlijst.nl/main.php?session_id=99ee78cf04dbea386a90b57743411b3d",
+                url="https://www.eetlijst.nl/main.php?session_id=99ee78cf04dbea386a90b57743411b3d",  # noqa
             ),
         ]
 
@@ -229,7 +229,7 @@ class EetlijstTest(unittest.TestCase):
         self.test_get_response = [
             MockResponse.from_file(
                 "test_main.html",
-                url="https://www.eetlijst.nl/main.php?session_id=bc731753a2d0fecccf12518759108b5b",
+                url="https://www.eetlijst.nl/main.php?session_id=bc731753a2d0fecccf12518759108b5b",  # noqa
             ),
         ]
 
@@ -266,11 +266,11 @@ class EetlijstTest(unittest.TestCase):
         self.test_get_response = [
             MockResponse.from_file(
                 "test_main.html",
-                url="https://www.eetlijst.nl/main.php?session_id=bc731753a2d0fecccf12518759108b5b",
+                url="https://www.eetlijst.nl/main.php?session_id=bc731753a2d0fecccf12518759108b5b",  # noqa
             ),
             MockResponse.from_file(
                 "test_main.html",
-                url="https://www.eetlijst.nl/main.php?session_id=99ee78cf04dbea386a90b57743411b3d",
+                url="https://www.eetlijst.nl/main.php?session_id=99ee78cf04dbea386a90b57743411b3d",  # noqa
             ),
         ]
 
@@ -302,7 +302,7 @@ class EetlijstTest(unittest.TestCase):
         self.test_get_response = [
             MockResponse.from_file(
                 "test_main.html",
-                url="https://www.eetlijst.nl/main.php?session_id=bc731753a2d0fecccf12518759108b5b",
+                url="https://www.eetlijst.nl/main.php?session_id=bc731753a2d0fecccf12518759108b5b",  # noqa
             )
         ]
 
@@ -319,7 +319,7 @@ class EetlijstTest(unittest.TestCase):
         self.test_get_response = [
             MockResponse.from_file(
                 "test_main.html",
-                url="https://www.eetlijst.nl/main.php?session_id=bc731753a2d0fecccf12518759108b5b",
+                url="https://www.eetlijst.nl/main.php?session_id=bc731753a2d0fecccf12518759108b5b",  # noqa
             )
         ]
 
@@ -336,7 +336,7 @@ class EetlijstTest(unittest.TestCase):
         self.test_get_response = [
             MockResponse.from_file(
                 "test_main2.html",
-                url="https://www.eetlijst.nl/main.php?session_id=bc731753a2d0fecccf12518759108b5b",
+                url="https://www.eetlijst.nl/main.php?session_id=bc731753a2d0fecccf12518759108b5b",  # noqa
             )
         ]
 
@@ -356,7 +356,7 @@ class EetlijstTest(unittest.TestCase):
         self.test_get_response = [
             MockResponse.from_file(
                 "test_main.html",
-                url="https://www.eetlijst.nl/main.php?session_id=bc731753a2d0fecccf12518759108b5b",
+                url="https://www.eetlijst.nl/main.php?session_id=bc731753a2d0fecccf12518759108b5b",  # noqa
             )
         ]
 
@@ -376,7 +376,7 @@ class EetlijstTest(unittest.TestCase):
         self.test_get_response = [
             MockResponse.from_file(
                 "test_main.html",
-                url="https://www.eetlijst.nl/main.php?session_id=bc731753a2d0fecccf12518759108b5b",
+                url="https://www.eetlijst.nl/main.php?session_id=bc731753a2d0fecccf12518759108b5b",  # noqa
             )
         ]
 
@@ -434,7 +434,7 @@ class EetlijstTest(unittest.TestCase):
         self.test_get_response = [
             MockResponse.from_file(
                 "test_main4.html",
-                url="https://www.eetlijst.nl/main.php?session_id=bc731753a2d0fecccf12518759108b5b",
+                url="https://www.eetlijst.nl/main.php?session_id=bc731753a2d0fecccf12518759108b5b",  # noqa
             )
         ]
 
@@ -512,7 +512,7 @@ class EetlijstTest(unittest.TestCase):
         self.test_get_response = [
             MockResponse.from_file(
                 "test_main4.html",
-                url="https://www.eetlijst.nl/main.php?session_id=bc731753a2d0fecccf12518759108b5b",
+                url="https://www.eetlijst.nl/main.php?session_id=bc731753a2d0fecccf12518759108b5b",  # noqa
             )
         ]
 
@@ -545,7 +545,7 @@ class EetlijstTest(unittest.TestCase):
         self.test_get_response = [
             MockResponse.from_file(
                 "test_main3.html",
-                url="https://www.eetlijst.nl/main.php?session_id=bc731753a2d0fecccf12518759108b5b",
+                url="https://www.eetlijst.nl/main.php?session_id=bc731753a2d0fecccf12518759108b5b",  # noqa
             )
         ]
 
